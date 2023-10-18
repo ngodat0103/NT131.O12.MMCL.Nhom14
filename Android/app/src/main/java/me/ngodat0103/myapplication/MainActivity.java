@@ -38,8 +38,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                  //  client_connection_module.client_connection_module_init("10.0.2.2",2509);
-                   client_connection_module.client_connection_module_init("server.uitprojects.com",2509);
+                    client_connection_module.client_connection_module_init("10.0.2.2",2509);
+                  // client_connection_module.client_connection_module_init("server.uitprojects.com",2509);
 
                 } catch (Exception e) {
                     e.printStackTrace();
