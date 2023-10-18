@@ -1,1 +1,4 @@
-/Server python/venv/
+Client/.idea/
+Client/venv/
+Server/.idea/
+Server/venv/
