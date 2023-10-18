@@ -2,3 +2,4 @@ Client/.idea/
 Client/venv/
 Server/.idea/
 Server/venv/
+Server/__pycache__/

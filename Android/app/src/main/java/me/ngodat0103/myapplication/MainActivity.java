@@ -38,7 +38,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 try {
-                    client_connection_module.client_connection_module_init("10.0.2.2",2509);
+                  //  client_connection_module.client_connection_module_init("10.0.2.2",2509);
+                   client_connection_module.client_connection_module_init("server.uitprojects.com",2509);
+
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -132,6 +134,15 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     authentication_thread.start();
+    }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        try {
+            client_connection_module.client_socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
