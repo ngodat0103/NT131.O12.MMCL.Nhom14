@@ -28,7 +28,8 @@ public class handle_request_types_module {
         request_message_Map.put("device_name", Build.MODEL);
         request_message_Map.put("refresh_token",refresh_token);
         send_message_to_client(request_message_Map);
-        return client_connection_module.listen_response_from_server();
+        Map response_from_server = client_connection_module.listen_response_from_server();
+        return response_from_server;
     }
     public static void forgot_password(String username_primary,String email) throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, IOException, InvalidKeyException, InvalidAlgorithmParameterException {
         request_message_Map = new HashMap<>();
