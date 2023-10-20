@@ -26,7 +26,6 @@ public class client_connection_module {
         client_socket = new Socket(host,port);
         output = client_socket.getOutputStream();
         input = client_socket.getInputStream();
-        System.out.println("Connected");
     }
     public static void send(byte[] message_bytes) throws IOException {
         int message_byte_length_int = message_bytes.length;

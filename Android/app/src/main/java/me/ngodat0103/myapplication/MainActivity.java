@@ -49,9 +49,15 @@ public class MainActivity extends AppCompatActivity {
         connection_server_client_Thread.start();
         String refresh_token = sharedPreferences.getString("refresh_token","null");
         Log.d("authentication","refresh_token: "+refresh_token);
-        if (!refresh_token.equals("null"))
-            authentication_usingtoken(refresh_token);
-        setContentView(R.layout.activity_main);
+            setContentView(R.layout.activity_main);
+        if (!refresh_token.equals("null")) {
+            try {
+                Thread.sleep(500);
+                authentication_usingtoken(refresh_token);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
+        }
 
     }
 
