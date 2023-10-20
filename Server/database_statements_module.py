@@ -17,4 +17,7 @@ general_statements: dict[str, str] = {
                           "where refresh_token = '{refresh_token}'",
     'get_weather': "SELECT * FROM mobile_project.weather_api order by date_primarykey desc",
     'update_token': "INSERT INTO `mobile_project`.`devices`(`uuid`,`device_name`,`username_foreignkey`,`refresh_token`)"
-                    "VALUES('{uuid}','{device_name}','{username_foreignkey}','{refresh_token}');"}
+                    "VALUES('{uuid}','{device_name}','{username_foreignkey}','{refresh_token}');",
+    'update_temp': "insert into `mobile_project`.`raspberry`(`time_primary`,`time_readable`,`temp`)VALUES(%s,%s,%s)",
+    'get_temp': "select temp from mobile_project.raspberry order by time_primary desc limit 1"
+}

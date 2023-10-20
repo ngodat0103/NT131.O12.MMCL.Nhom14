@@ -103,14 +103,36 @@ def get_weather_data(argument: dict):
     return {"type": "get_weather", "status": "success", "weather_data": weather_data_firstrow_dataframe.to_json()}
 
 
+import datetime
+
+
+def update_temp(argument: dict):
+    fullstatement: str = general_statements["update_temp"]
+    time_primary_int: int = argument['time_primary']
+    time_readable_str = datetime.datetime.fromtimestamp(time_primary_int).strftime("%d-%m-%Y: %H:%M:%S ")
+    params = (time_primary_int, time_readable_str, argument['temp'])
+    print(params)
+    database_module.access_database(fullstatement, params)
+
+
+def get_temp(argument: dict = None):
+    fullstatement: str = general_statements['get_temp']
+    response_from_mysql = database_module.access_database(fullstatement)
+    return {"type": "get_temp", "temp": response_from_mysql[0][0]}
+
+
+get_temp()
 type_client_message = {
     "authentication": authentication,
     "create_account": create_account,
     "forgot_password": forgot_password,
     "upload_image_profile": upload_image_profile,
     "load_profile_image": load_profile_image,
-    "get_weather_data":get_weather_data
+    "get_weather_data": get_weather_data,
+    "update_temp": update_temp,
+    "get_temp": get_temp
 }
+
 
 def process(client_message: dict):
     return type_client_message[client_message["type"]](client_message)

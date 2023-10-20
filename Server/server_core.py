@@ -14,15 +14,18 @@ class Handle_raspberry_app_socket:
 
     def listen_mode(self):
         while True:
-            try:
-                raspberry_app_message = self.listen()
-            except ValueError:
-                print("raspberry close connection")
-                return
-            print(raspberry_app_message)
+            raspberry_app_message = self.listen()
+            if raspberry_app_message==None:
+                print("Raspberry close connection")
+                break
+            if raspberry_app_message['type'] == 'update_temp':
+                self.response_to_client(handle_types_message_client_module.process(raspberry_app_message))
 
-    def listen(self) -> dict[str, str]:
-        header_length_bytes = self.raspberry_app_socket.recv(4)
+    def listen(self) :
+        try:
+            header_length_bytes = self.raspberry_app_socket.recv(4)
+        except ConnectionError:
+            return None
         header_length_int = int.from_bytes(header_length_bytes, "big")
         buffer_data_byte = b''
         while len(buffer_data_byte) < header_length_int:
@@ -37,12 +40,25 @@ class Handle_raspberry_app_socket:
         # raspberry_app_message: dict = json.loads(message_plaintext_str)
         return raspberry_app_message
 
+    def response_to_client(self, message: dict, large_data: bool = False):
+        if large_data is False:
+            response_to_client_message_json_string = json.dumps(message)
+            response_to_client_message_json_encrypted_bytes = Cipher_module.encrypt(
+                response_to_client_message_json_string)
+            response_to_client_message_header_int = len(response_to_client_message_json_encrypted_bytes)
+            response_to_client_message_header_bytes = response_to_client_message_header_int.to_bytes(4, "big")
+            self.raspberry_app_socket.send(response_to_client_message_header_bytes)
+            self.raspberry_app_socket.send(response_to_client_message_json_encrypted_bytes)
+        else:
+            self.raspberry_app_socket.send(Handle_android_app_socket.large_data)
+            Handle_android_app_socket.large_data = None
+
 
 class Handle_android_app_socket:
     large_data: bytes = b''
 
     def __init__(self, android_app_socket: socket):
-        self.server_handle_client_socket:socket = android_app_socket
+        self.server_handle_client_socket: socket = android_app_socket
         new_thread = threading.Thread(target=self.listen_mode)
         new_thread.start()
 
@@ -51,6 +67,8 @@ class Handle_android_app_socket:
             client_message_dict = self.listen()
             if client_message_dict is None:
                 break
+            if client_message_dict["type"] != "get_temp":
+                print(client_message_dict)
             if client_message_dict["type"] == "forgot_password":
                 random_otp = str(randint(a=100000, b=999999))
                 client_message_dict["random_otp"] = random_otp
@@ -69,11 +87,10 @@ class Handle_android_app_socket:
                     self.response_to_client({"type": "forgot_password", "otp_valid": "invalid"})
             elif client_message_dict["type"] == "load_profile_image":
                 self.response_to_client(handle_types_message_client_module.process(client_message_dict))
-                self.response_to_client(handle_types_message_client_module.process(client_message_dict),large_data=True)
+                self.response_to_client(handle_types_message_client_module.process(client_message_dict),
+                                        large_data=True)
             else:
                 self.response_to_client(handle_types_message_client_module.process(client_message_dict))
-
-
 
     def response_to_client(self, message: dict, large_data: bool = False):
         if large_data is False:
@@ -108,7 +125,6 @@ class Handle_android_app_socket:
         except ValueError:
             print("Android close conenction")
             return
-        print(message_plaintext_str)
         client_message: dict = json.loads(message_plaintext_str)
         return client_message
 
