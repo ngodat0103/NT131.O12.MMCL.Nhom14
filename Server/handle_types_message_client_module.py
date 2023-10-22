@@ -22,7 +22,6 @@ def authentication(argument: dict) -> dict[str, str]:
         full_statement_str = general_statements["authentication_token"].format(refresh_token=argument["refresh_token"])
 
     response_from_mysql = database_module.access_database(full_statement_str)
-    print(response_from_mysql)
     if response_from_mysql:
         if refresh_token_str == "null":
             refresh_token_str = cipher_module.generate_random_token(32)
