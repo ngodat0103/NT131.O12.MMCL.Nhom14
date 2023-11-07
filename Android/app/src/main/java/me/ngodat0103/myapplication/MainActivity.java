@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
@@ -14,10 +15,22 @@ import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
 
+import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.ProtocolException;
+import java.net.URL;
+import java.net.URLEncoder;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -31,114 +44,81 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        sharedPreferences = getSharedPreferences("token", Context.MODE_PRIVATE);
-        share_PreFerences_Editor = sharedPreferences.edit();
-        Thread connection_server_client_Thread = new Thread(new Runnable() {
+        setContentView(R.layout.activity_main);
+       // sharedPreferences = getSharedPreferences("token", Context.MODE_PRIVATE);
+       // share_PreFerences_Editor = sharedPreferences.edit();
 
-            @Override
-            public void run() {
-                try {
-                  // client_connection_module.client_connection_module_init("10.0.2.2",2509);
-                   client_connection_module.client_connection_module_init("server.uitprojects.com",2509);
 
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        });
-        connection_server_client_Thread.start();
-        String refresh_token = sharedPreferences.getString("refresh_token","null");
-        Log.d("authentication","refresh_token: "+refresh_token);
-            setContentView(R.layout.activity_main);
-        if (!refresh_token.equals("null")) {
-            try {
-                Thread.sleep(1000);
-                authentication_usingtoken(refresh_token);
-            } catch (InterruptedException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-    }
-
-    private void authentication_usingtoken(String refresh_token){
-        Thread authentication_usingtoken_Thread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                Map response_from_server;
-                try {
-                  response_from_server = handle_request_types_module.authentication("null","null",refresh_token);
-                } catch (NoSuchPaddingException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalBlockSizeException e) {
-                    throw new RuntimeException(e);
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (BadPaddingException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidKeyException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidAlgorithmParameterException e) {
-                    throw new RuntimeException(e);
-                }
-                ui_Handle.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("authentication",response_from_server.toString());
-                        if (response_from_server.get("status").toString().equals("success")) {
-                            Intent dashboard_Intent = new Intent(MainActivity.this, DashboardActivity.class);
-                            dashboard_Intent.putExtra("refresh_token",response_from_server.get("refresh_token").toString());
-                            startActivity(dashboard_Intent);
-                        }
-                    }
-                });
-            }
-        });
-        authentication_usingtoken_Thread.start();
     }
     public void login_Button(View view) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, IOException, InvalidKeyException {
         EditText username_EditText = findViewById(R.id.username);
         EditText password_EditText = findViewById(R.id.password);
+        Log.d("authentication","has called");
         Thread authentication_thread = new Thread(new Runnable() {
-            Map response_from_server_Map;
+            URL login_url;
+            HttpURLConnection con;
+            Map<String, String> parameters = new HashMap<>();
+            DataOutputStream out;
             public void run() {
+
                 try {
-                    response_from_server_Map = handle_request_types_module.authentication(username_EditText.getText().toString(),password_EditText.getText().toString(),"null");
-                } catch (NoSuchPaddingException e) {
+                    login_url = new URL("http://10.0.2.2/authentication");
+                    parameters.put("username_primary",username_EditText.getText().toString());
+                    parameters.put("password",password_EditText.getText().toString());
+                    parameters.put("device_name",Build.MODEL);
+                    con = (HttpURLConnection) login_url.openConnection();
+                    con.setRequestMethod("POST");
+                    con.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
+                    con.setDoOutput(true);
+                    StringBuilder result = new StringBuilder();
+                    out = new DataOutputStream(con.getOutputStream());
+                    for(Map.Entry<String,String> entry: parameters.entrySet()) {
+                        try {
+                            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                        result.append("=");
+                        try {
+                            result.append(URLEncoder.encode(entry.getValue(),"UTF-8"));
+                        } catch (UnsupportedEncodingException e) {
+                            throw new RuntimeException(e);
+                        }
+                        result.append("&");
+                    }
+                    String resultString = result.toString();
+                    resultString = resultString.substring(0,resultString.length()-1);
+                    out.writeBytes(resultString);
+                    out.flush();
+                    out.close();
+
+
+                    int status = con.getResponseCode();
+                    if (status==200) {
+                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+                        StringBuffer content = new StringBuffer();
+                        String read_line;
+                        while ((read_line = in.readLine()) != null) {
+                            content.append(read_line);
+                        }
+                        ui_Handle.post(new Runnable() {
+                            @Override
+                            public void run() {
+
+                                Log.d("authentication:", String.valueOf(content.toString()));
+                            }
+                        });
+                    }
+                } catch (MalformedURLException e) {
                     throw new RuntimeException(e);
-                } catch (IllegalBlockSizeException e) {
-                    throw new RuntimeException(e);
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (BadPaddingException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidKeyException e) {
+                } catch (ProtocolException e) {
                     throw new RuntimeException(e);
                 } catch (IOException e) {
                     throw new RuntimeException(e);
-                } catch (InvalidAlgorithmParameterException e) {
-                    throw new RuntimeException(e);
                 }
-                ui_Handle.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Log.d("authentication",response_from_server_Map.toString());
-                        String status_login_string = response_from_server_Map.get("status").toString();
-                        if(status_login_string.equals("success")) {
-                            share_PreFerences_Editor.putString("refresh_token", response_from_server_Map.get("refresh_token").toString());
-                            share_PreFerences_Editor.apply();
-                            String refresh_token = sharedPreferences.getString("refresh_token", "NULL");
-                            Intent dashboard_Intent = new Intent(MainActivity.this, DashboardActivity.class);
-                            dashboard_Intent.putExtra("refresh_token", response_from_server_Map.get("refresh_token").toString());
-                            startActivity(dashboard_Intent);
-                        }
 
-                    }
-                });
             }
-        });
+            });
     authentication_thread.start();
     }
 }
