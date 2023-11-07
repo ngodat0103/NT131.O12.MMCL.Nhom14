@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import java.io.BufferedReader;
 import java.io.DataInputStream;
@@ -32,6 +34,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -41,82 +44,54 @@ public class MainActivity extends AppCompatActivity {
     SharedPreferences sharedPreferences;
     SharedPreferences.Editor share_PreFerences_Editor;
     Handler ui_Handle = new Handler();
+    Button register_btn;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
        // sharedPreferences = getSharedPreferences("token", Context.MODE_PRIVATE);
        // share_PreFerences_Editor = sharedPreferences.edit();
+        register_btn = findViewById(R.id.btn_register);
+        register_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent register = new Intent(getApplicationContext(),Register.class);
+                startActivity(register);
 
+            }
+        });
 
     }
+
+
+
     public void login_Button(View view) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, IOException, InvalidKeyException {
         EditText username_EditText = findViewById(R.id.username);
         EditText password_EditText = findViewById(R.id.password);
-        Log.d("authentication","has called");
         Thread authentication_thread = new Thread(new Runnable() {
-            URL login_url;
-            HttpURLConnection con;
-            Map<String, String> parameters = new HashMap<>();
-            DataOutputStream out;
+            Map<String,String> response_json;
             public void run() {
-
                 try {
-                    login_url = new URL("http://10.0.2.2/authentication");
-                    parameters.put("username_primary",username_EditText.getText().toString());
-                    parameters.put("password",password_EditText.getText().toString());
-                    parameters.put("device_name",Build.MODEL);
-                    con = (HttpURLConnection) login_url.openConnection();
-                    con.setRequestMethod("POST");
-                    con.setRequestProperty("Content-Type","application/x-www-form-urlencoded");
-                    con.setDoOutput(true);
-                    StringBuilder result = new StringBuilder();
-                    out = new DataOutputStream(con.getOutputStream());
-                    for(Map.Entry<String,String> entry: parameters.entrySet()) {
-                        try {
-                            result.append(URLEncoder.encode(entry.getKey(), "UTF-8"));
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
-                        result.append("=");
-                        try {
-                            result.append(URLEncoder.encode(entry.getValue(),"UTF-8"));
-                        } catch (UnsupportedEncodingException e) {
-                            throw new RuntimeException(e);
-                        }
-                        result.append("&");
-                    }
-                    String resultString = result.toString();
-                    resultString = resultString.substring(0,resultString.length()-1);
-                    out.writeBytes(resultString);
-                    out.flush();
-                    out.close();
-
-
-                    int status = con.getResponseCode();
-                    if (status==200) {
-                        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-                        StringBuffer content = new StringBuffer();
-                        String read_line;
-                        while ((read_line = in.readLine()) != null) {
-                            content.append(read_line);
-                        }
-                        ui_Handle.post(new Runnable() {
-                            @Override
-                            public void run() {
-
-                                Log.d("authentication:", String.valueOf(content.toString()));
-                            }
-                        });
-                    }
-                } catch (MalformedURLException e) {
-                    throw new RuntimeException(e);
-                } catch (ProtocolException e) {
-                    throw new RuntimeException(e);
+                    response_json =  Api_request.authentication(username_EditText.getText().toString(),password_EditText.getText().toString());
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
 
+                if (Objects.equals(response_json.get("status"),"success"))
+                {
+                    Intent dashboard = new Intent(getApplicationContext(), DashboardActivity.class);
+                    dashboard.putExtra("refresh_token",response_json.get("refresh_token"));
+                    dashboard.putExtra("image_profile",response_json.get("image_profile"));
+                    startActivity(dashboard);
+                }
+                else {
+                    ui_Handle.post(new Runnable() {
+                        @Override
+                        public void run() {
+                            Toast.makeText(getApplicationContext(), "username or password invalid", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
             }
             });
     authentication_thread.start();

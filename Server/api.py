@@ -4,6 +4,8 @@ app = Flask(__name__)
 # app.run()
 from handle_types_message_client_module import *
 
+app.run(port=80, debug=True)
+
 
 @app.route('/authentication', methods=['POST'])
 def login():
@@ -13,3 +15,8 @@ def login():
 @app.route('/update_temp', methods=['POST'])
 def update():
     return update_temp(request.form.to_dict())
+
+
+@app.route("/registration", methods=['POST'])
+def registration():
+    return create_account(request.form.to_dict())

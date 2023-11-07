@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.Base64;
 import java.util.Map;
 
 import javax.crypto.BadPaddingException;
@@ -39,81 +40,11 @@ Thread background_Thread;
         temp_textview = findViewById(R.id.temp_textview);
         Intent self_Intent = getIntent();
         String refresh_token = self_Intent.getStringExtra("refresh_token");
-        background_Thread = new Thread(new Runnable() {
-            byte[] image_profile_bytes;
-            String temp;
-          //  Map weather_data_Map;
-            @Override
-            public void run() {
-                try {
-                    image_profile_bytes = handle_request_types_module.load_profile_image(refresh_token);
-                    //   weather_data_Map = handle_request_types_module.get_weather();
-                } catch (NoSuchPaddingException e) {
-                    throw new RuntimeException(e);
-                } catch (IllegalBlockSizeException e) {
-                    throw new RuntimeException(e);
-                } catch (NoSuchAlgorithmException e) {
-                    throw new RuntimeException(e);
-                } catch (BadPaddingException e) {
-                    throw new RuntimeException(e);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidKeyException e) {
-                    throw new RuntimeException(e);
-                } catch (InvalidAlgorithmParameterException e) {
-                    throw new RuntimeException(e);
-                }
-                ui_Handler.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        Bitmap image_Bitmap = BitmapFactory.decodeByteArray(image_profile_bytes, 0, image_profile_bytes.length);
-                        image_profile_ImageView.setImageBitmap(image_Bitmap);
-                        temp_textview.setVisibility(View.VISIBLE);
-                        //   Log.d("weather", weather_data_Map.toString());
-                    }
-                });
-                while (true) {
-                    try {
-                        if (interrupted()) {
-                            return;
-                        }
-                        Thread.sleep(300);
-                        temp = handle_request_types_module.get_temp();
-                    } catch (NoSuchPaddingException e) {
-                        throw new RuntimeException(e);
-                    } catch (IllegalBlockSizeException e) {
-                        throw new RuntimeException(e);
-                    } catch (NoSuchAlgorithmException e) {
-                        throw new RuntimeException(e);
-                    } catch (BadPaddingException e) {
-                        throw new RuntimeException(e);
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    } catch (InvalidKeyException e) {
-                        break;
-                    } catch (InvalidAlgorithmParameterException e) {
-                        throw new RuntimeException(e);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
-                    ui_Handler.post(new Runnable() {
-                        @Override
-                        public void run() {
-                            String text = "temp: " + temp;
-                            Log.d("temp",temp);
-                            temp_textview.setText(text);
-                        }
-                    });
-
-                }
-            }
-        });
-        background_Thread.start();
+        String image_profile_String = self_Intent.getStringExtra("image_profile");
+        byte[] image_profile_bytes = image_profile_String.getBytes();
+        image_profile_bytes = Base64.getDecoder().decode(image_profile_bytes);
+        Bitmap image_bitmap = BitmapFactory.decodeByteArray(image_profile_bytes,0,image_profile_bytes.length);
+        image_profile_ImageView.setImageBitmap(image_bitmap);
     }
 
-    @Override
-    protected void onDestroy() {
-        background_Thread.interrupt();
-        super.onDestroy();
-    }
 }
