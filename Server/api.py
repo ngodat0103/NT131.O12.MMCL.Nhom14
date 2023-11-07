@@ -4,9 +4,6 @@ app = Flask(__name__)
 # app.run()
 from handle_types_message_client_module import *
 
-app.run(port=80, debug=True)
-
-
 @app.route('/authentication', methods=['POST'])
 def login():
     return authentication(request.form.to_dict())
