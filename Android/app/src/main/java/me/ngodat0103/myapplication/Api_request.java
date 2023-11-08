@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Api_request  {
+    static String HOST = "http:server.uitprojects.com/";
 
 
     static String url_encoded_builder(Map<String,String> parameters){
@@ -53,7 +54,7 @@ public class Api_request  {
 
 
     static public Map<String,String> authentication(String username,String password) throws IOException {
-        URL login_url = new URL("http://10.0.2.2/authentication");
+        URL login_url = new URL(HOST.concat("authentication"));
 
         Map<String, String> parameters = new HashMap<>();
         parameters.put("username_primary", username);
@@ -90,7 +91,7 @@ public class Api_request  {
     }
 
     static Map<String,String> register(String username,String password,String email) throws IOException {
-        URL login_url = new URL("http://10.0.2.2/registration");
+        URL login_url = new URL(HOST.concat("registration"));
         HttpURLConnection con = (HttpURLConnection) login_url.openConnection();
         con.setRequestMethod("POST");
         con.setRequestProperty("Content-type","application/x-www-form-urlencoded");
