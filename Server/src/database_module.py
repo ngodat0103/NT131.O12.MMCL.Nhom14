@@ -4,7 +4,6 @@ import io
 import mysql.connector
 import os
 
-from PIL import Image
 
 USERNAME = os.getenv("username_mysql")
 PASSWORD = os.getenv("password_mysql")

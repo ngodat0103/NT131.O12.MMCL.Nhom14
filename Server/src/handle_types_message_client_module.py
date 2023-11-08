@@ -3,7 +3,6 @@ import mysql.connector.errors
 import pandas
 
 import cipher_module
-import server_core
 import smtp
 from database_statements_module import general_statements
 import database_module
@@ -12,8 +11,8 @@ from sqlalchemy import create_engine
 
 
 def authentication(argument: dict) -> dict[str, str]:
-    refresh_token_str = argument["refresh_token"]
-    if refresh_token_str == "null":
+    refresh_token_str = argument.get("refresh_token")
+    if refresh_token_str is None:
         full_statement_str = general_statements["authentication_credential"].format(
             username_primary=argument["username_primary"],
             hashed_password=hash_password(
@@ -23,27 +22,40 @@ def authentication(argument: dict) -> dict[str, str]:
 
     response_from_mysql = database_module.access_database(full_statement_str)
     if response_from_mysql:
-        if refresh_token_str == "null":
+        if refresh_token_str is None:
             refresh_token_str = cipher_module.generate_random_token(32)
             uuid_str = cipher_module.generate_random_token(10)
             update_token_fullstatement_str = general_statements["update_token"].format(
                 username_foreignkey=argument["username_primary"], device_name=argument["device_name"],
                 refresh_token=refresh_token_str, uuid=uuid_str)
             database_module.access_database(update_token_fullstatement_str)
-            return {"type": "login", "status": "success", "refresh_token": refresh_token_str}
+            return {
+                "type": "login",
+                 "status": "success",
+                 "refresh_token": refresh_token_str,
+                "image_profile":base64.b64encode(response_from_mysql[0][3]).decode()
+            }
+
         else:
-            return {"type": "login", "status": "success", "refresh_token": refresh_token_str}
+            print(response_from_mysql)
+            return {"type": "login",
+                    "status": "success",
+                    "refresh_token": refresh_token_str,
+                    "image_profile":base64.b64encode(response_from_mysql[0][3]).decode()
+            }
     else:
         return {"type": "login", "status": "failed"}
 
 
 def create_account(argument: dict) -> dict[str, str]:
-    full_statement = general_statements["create_account"].format(username_primary=argument["username_primary"],
-                                                                 hashed_password=hash_password(argument["password"]),
-                                                                 email=argument["email"]
-                                                                 )
+    full_statement = general_statements["create_account"]
+    params = (
+        argument["username_primary"],
+        argument["password"],
+        argument["email"]
+    )
     try:
-        database_module.access_database(full_statement)
+        database_module.access_database(full_statement,params)
     except mysql.connector.errors.IntegrityError:
         return {"create_account": "failed_because_username_exist"}
     return {"create_account": "successful"}
@@ -85,7 +97,6 @@ def load_profile_image(argument: dict):
 
     response_from_mysql_list = database_module.access_database(fullstatement)
     load_image_bytes: bytes = response_from_mysql_list[0][0]
-    server_core.Handle_android_app_socket.large_data = load_image_bytes
 
     return {"type": "load_profile_image", "status": "pending_download", "large_file_size": str(len(load_image_bytes)),
             "large_data": "true"}
@@ -107,11 +118,16 @@ import datetime
 
 def update_temp(argument: dict):
     fullstatement: str = general_statements["update_temp"]
-    time_primary_int: int = argument['time_primary']
+    time_primary_int: int = int(argument['time_primary'])
     time_readable_str = datetime.datetime.fromtimestamp(time_primary_int).strftime("%d-%m-%Y: %H:%M:%S ")
     params = (time_primary_int, time_readable_str, argument['temp'])
     print(params)
-    database_module.access_database(fullstatement, params)
+    try:
+        database_module.access_database(fullstatement, params)
+    except mysql.connector.errors.IntegrityError:
+        return {"type": "update_temp", "status": "can't update","reason":"duplicate primary key"}
+    return {"type":"update_temp","status":"Ok"}
+
 
 
 def get_temp(argument: dict = None):
@@ -120,7 +136,6 @@ def get_temp(argument: dict = None):
     return {"type": "get_temp", "temp": response_from_mysql[0][0]}
 
 
-get_temp()
 type_client_message = {
     "authentication": authentication,
     "create_account": create_account,

@@ -2,7 +2,7 @@ general_statements: dict[str, str] = {
     'authentication_token': "select * from devices "
                             "join account on devices.username_foreignkey = account.username_primary "
                             "where refresh_token='{refresh_token}'",
-    'authentication_credential': "select username_primary from mobile_project.account "
+    'authentication_credential': "select * from mobile_project.account "
                                  "where username_primary='{username_primary}' and hashed_password='{hashed_password}'",
     'forgot_password': "SELECT * FROM mobile_project.account "
                        "where email = '{email}' and username_primary = '{username_primary}'",
@@ -19,5 +19,6 @@ general_statements: dict[str, str] = {
     'update_token': "INSERT INTO `mobile_project`.`devices`(`uuid`,`device_name`,`username_foreignkey`,`refresh_token`)"
                     "VALUES('{uuid}','{device_name}','{username_foreignkey}','{refresh_token}');",
     'update_temp': "insert into `mobile_project`.`raspberry`(`time_primary`,`time_readable`,`temp`)VALUES(%s,%s,%s)",
-    'get_temp': "select temp from mobile_project.raspberry order by time_primary desc limit 1"
+    'get_temp': "select temp from mobile_project.raspberry order by time_primary desc limit 1",
+    'create_account':"insert into mobile_project.account(`username_primary`,`hashed_password`,`email`) values(%s,%s,%s)"
 }
