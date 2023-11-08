@@ -37,7 +37,7 @@ Thread background_Thread;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.dashboard);
         image_profile_ImageView = findViewById(R.id.image_profile_ImageView);
-        temp_textview = findViewById(R.id.temp_textview);
+        temp_textview = findViewById(R.id.txtview_temp);
         Intent self_Intent = getIntent();
         String refresh_token = self_Intent.getStringExtra("refresh_token");
         String image_profile_String = self_Intent.getStringExtra("image_profile");
@@ -45,6 +45,36 @@ Thread background_Thread;
         image_profile_bytes = Base64.getDecoder().decode(image_profile_bytes);
         Bitmap image_bitmap = BitmapFactory.decodeByteArray(image_profile_bytes,0,image_profile_bytes.length);
         image_profile_ImageView.setImageBitmap(image_bitmap);
+
+
+        Thread get_temp_Thread = new Thread(new Runnable() {
+            String temp;
+            @Override
+            public void run() {
+                while(true) {
+                    try {
+                        temp = Api_request.get_temp();
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
+                    ui_Handler.post(new Runnable() {
+                        @Override
+                        public void run() {
+
+                            temp_textview.setText("Temp: ".concat(temp));
+                        }
+                    });
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        throw new RuntimeException(e);
+                    }
+
+                }
+            }
+        });
+        get_temp_Thread.start();
+
     }
 
 }

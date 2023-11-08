@@ -10,6 +10,7 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
+import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -61,7 +62,6 @@ public class Api_request  {
         parameters.put("password", password);
         parameters.put("device_name", Build.MODEL);
         String url_encoded_data = Api_request.url_encoded_builder(parameters);
-
 
         HttpURLConnection con = (HttpURLConnection) login_url.openConnection();
         con.setRequestMethod("POST");
@@ -120,5 +120,29 @@ public class Api_request  {
         }
         else
             return null;
+    }
+
+    static String get_temp() throws IOException {
+        URL login_url = new URL(HOST.concat("current_temp"));
+
+        HttpURLConnection con = (HttpURLConnection) login_url.openConnection();
+        con.setRequestMethod("GET");
+
+
+        StringBuffer content = new StringBuffer();
+        int status = con.getResponseCode();
+        if (status == 200) {
+            BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+            content = new StringBuffer();
+            String read_line;
+            while ((read_line = in.readLine()) != null) {
+                content.append(read_line);
+            }
+            in.close();
+        }
+        String form_url_String = content.toString();
+        Map<String,String> response_Map = convert_to_map(form_url_String);
+
+        return response_Map.get("temp");
     }
 }

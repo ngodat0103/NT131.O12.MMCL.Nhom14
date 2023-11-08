@@ -1,6 +1,5 @@
-Client/.idea/
-Client/venv/
-Server/.idea/
-Server/venv/
-Server/__pycache__/
-Client/__pycache__/cipher_module.cpython-311.pyc
+Client/src/.idea/
+Client/src/venv/
+Server/src/.idea/
+Server/src/venv/
+Server/src/__pycache__/
