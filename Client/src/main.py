@@ -7,5 +7,5 @@ url_encoded_data = {
     "temp": "100",
     "time_primary": int(time.time())
 }
-request = requests.post("http://localhost/update_temp", data=url_encoded_data)
+request = requests.post("http://server.uitprojects.com/update_temp", data=url_encoded_data)
 print(request.json())
