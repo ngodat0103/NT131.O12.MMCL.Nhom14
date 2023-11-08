@@ -1,13 +1,14 @@
 import base64
 import mysql.connector.errors
 import pandas
-
+from random_otp.generator import generate_numeric_otp
 import cipher_module
 import smtp
 from database_statements_module import general_statements
 import database_module
 from cipher_module import hash_password
 from sqlalchemy import create_engine
+import time
 
 
 def authentication(argument: dict) -> dict[str, str]:
@@ -31,9 +32,9 @@ def authentication(argument: dict) -> dict[str, str]:
             database_module.access_database(update_token_fullstatement_str)
             return {
                 "type": "login",
-                 "status": "success",
-                 "refresh_token": refresh_token_str,
-                "image_profile":base64.b64encode(response_from_mysql[0][3]).decode()
+                "status": "success",
+                "refresh_token": refresh_token_str,
+                "image_profile": base64.b64encode(response_from_mysql[0][3]).decode()
             }
 
         else:
@@ -41,10 +42,10 @@ def authentication(argument: dict) -> dict[str, str]:
             return {"type": "login",
                     "status": "success",
                     "refresh_token": refresh_token_str,
-                    "image_profile":base64.b64encode(response_from_mysql[0][3]).decode()
-            }
+                    "image_profile": base64.b64encode(response_from_mysql[0][3]).decode()
+                    }
     else:
-        return {"type": "login", "status": "failed"}
+        return {"type": "login", "status": "failed", "reason": "username or password invalid"}
 
 
 def create_account(argument: dict) -> dict[str, str]:
@@ -55,33 +56,46 @@ def create_account(argument: dict) -> dict[str, str]:
         argument["email"]
     )
     try:
-        database_module.access_database(full_statement,params)
-    except mysql.connector.errors.IntegrityError:
-        return {"create_account": "failed_because_username_exist"}
-    return {"create_account": "successful"}
+        database_module.access_database(full_statement, params)
+    except mysql.connector.errors.IntegrityError as error:
+        print(str(error))
+        return {"status": "can't create account", "reason": str(error)}
+    return {"status": "successful"}
 
 
-def forgot_password(argument: dict = None):
-    if argument["otp_valid"] == "none":
-        full_statement = general_statements["forgot_password"].format(email=argument["email"],
-                                                                      username_primary=argument["username_primary"])
-        response_from_mysql = database_module.access_database(full_statement)
-        if response_from_mysql is not None:
-            smtp.send_email_otp(argument["random_otp"], argument["email"])
-            return {"type": "forgot_password", "status": "correct_username_email"}
-
+def forgot_password(argument: dict = None, check_otp=False):
+    if check_otp is False:
+        response = database_module.access_database(
+            general_statements["forgot_password"],
+            (argument["email"], argument["username_primary"])
+        )
+        if len(response) == 1:
+            random_otp = generate_numeric_otp(6)
+            database_module.access_database(
+                general_statements["update_otp"],
+                (hash_password(random_otp), argument["username_primary"])
+            )
+            smtp.send_email_otp(random_otp, argument["email"])
+        return {"type": "reset password", "status": "otp_sent"}
+    else:
+        response = database_module.access_database(
+            general_statements["check_valid_otp"],
+            (
+                hash_password(str(argument["otp_code"])),
+                argument["username_primary"],
+            )
+        )
+        if len(response) == 1:
+            return {
+                "type": "check valid otp",
+                "status": "valid"
+            }
         else:
-            return {"type": "forgot_password", "status": "incorrect_username_email"}
-    elif argument["otp_valid"] == "valid":
-        full_statement = general_statements["change_new_password"].format(username_primary=argument["username_primary"],
-                                                                          email=argument["email"],
-                                                                          new_hashed_password=hash_password(
-                                                                              argument["new_password"]))
-        try:
-            database_module.access_database(full_statement)
-        except mysql.connector.errors.IntegrityError:
-            pass
-        return {"type": "forgot_password", "status": "change_password_success"}
+            return {
+                "type": "check valid otp",
+                "status": "failed",
+                "reason": "invalid otp"
+            }
 
 
 def upload_image_profile(argument: dict):
@@ -125,9 +139,8 @@ def update_temp(argument: dict):
     try:
         database_module.access_database(fullstatement, params)
     except mysql.connector.errors.IntegrityError:
-        return {"type": "update_temp", "status": "can't update","reason":"duplicate primary key"}
-    return {"type":"update_temp","status":"Ok"}
-
+        return {"type": "update_temp", "status": "can't update", "reason": "duplicate primary key"}
+    return {"type": "update_temp", "status": "Ok"}
 
 
 def get_temp(argument: dict = None):
@@ -147,6 +160,7 @@ type_client_message = {
     "get_temp": get_temp
 }
 
-
-def process(client_message: dict):
-    return type_client_message[client_message["type"]](client_message)
+test_forgot_password = {
+    "username_primary": "test_account1",
+    "email": "ngovuminhdat@gmail.com"
+}
