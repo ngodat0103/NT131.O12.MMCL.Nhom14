@@ -8,7 +8,7 @@ from database_statements_module import general_statements
 import database_module
 from cipher_module import hash_password
 from sqlalchemy import create_engine
-import time
+from time import time
 
 
 def authentication(argument: dict) -> dict[str, str]:
@@ -76,7 +76,7 @@ def forgot_password(argument: dict = None, check_otp=False):
                 (hash_password(random_otp), argument["username_primary"])
             )
             smtp.send_email_otp(random_otp, argument["email"])
-        return {"type": "reset password", "status": "otp_sent"}
+        return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes"}
     else:
         response = database_module.access_database(
             general_statements["check_valid_otp"],
@@ -95,6 +95,33 @@ def forgot_password(argument: dict = None, check_otp=False):
                 "type": "check valid otp",
                 "status": "failed",
                 "reason": "invalid otp"
+            }
+
+
+def forgot_password(email: str, check_otp=False, otp_code: str = None):
+    if check_otp is False:
+        random_otp = generate_numeric_otp(6)
+        database_module.access_database(
+            general_statements["update_otp_android_project"],
+            (email, hash_password(random_otp),
+             int(time()) + 120))
+        smtp.send_email_otp(random_otp, email)
+        return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes"}
+    else:
+        response = database_module.access_database(
+            general_statements["check_otp_android_project"],
+            (email, hash_password(otp_code), int(time()))
+        )
+        if len(response) == 1:
+            return {
+                "type": "check valid otp",
+                "status": "valid"
+            }
+        else:
+            return {
+                "type": "check valid otp",
+                "status": "failed",
+                "reason": "invalid otp or expired"
             }
 
 

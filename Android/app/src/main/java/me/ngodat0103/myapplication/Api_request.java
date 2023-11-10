@@ -3,14 +3,11 @@ package me.ngodat0103.myapplication;
 import android.os.Build;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.HashMap;
@@ -40,7 +37,7 @@ public class Api_request  {
         resultString = resultString.substring(0, resultString.length() - 1);
         return resultString;
     }
-    static Map<String,String> convert_to_map(String url_encoded_String){
+    static Map<String,String> convertToMap(String url_encoded_String){
         url_encoded_String = url_encoded_String.trim();
         Map<String,String> new_map = new HashMap<>();
         String[] elements;
@@ -85,7 +82,7 @@ public class Api_request  {
             in.close();
         }
         String form_url_String = content.toString();
-        Map<String,String> authen_map = Api_request.convert_to_map(form_url_String);
+        Map<String,String> authen_map = Api_request.convertToMap(form_url_String);
         con.disconnect();
     return authen_map;
     }
@@ -116,7 +113,7 @@ public class Api_request  {
             String form_url_String = content.toString();
             in.close();
             con.disconnect();
-            return convert_to_map(form_url_String);
+            return convertToMap(form_url_String);
         }
         else
             return null;
@@ -141,7 +138,7 @@ public class Api_request  {
             in.close();
         }
         String form_url_String = content.toString();
-        Map<String,String> response_Map = convert_to_map(form_url_String);
+        Map<String,String> response_Map = convertToMap(form_url_String);
 
         return response_Map.get("temp");
     }

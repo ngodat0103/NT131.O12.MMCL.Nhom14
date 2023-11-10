@@ -18,10 +18,18 @@ def registration():
 
 @app.route("/reset_password", methods=['POST'])
 def reset_password():
-    if request.headers.get("check-valid-otp") == "false":
-        return forgot_password(request.form.to_dict(),False)
+    if request.headers.get("projects") == "mobile":
+        if request.headers.get("check-valid-otp") == "false":
+            return forgot_password(request.form.get("email"), False)
+        else:
+            return forgot_password(request.form.get("email"), True, request.form.get("otp_code"))
+    elif request.headers.get("projects") == "nhung":
+        if request.headers.get("check-valid-otp") == "false":
+            return forgot_password(request.form.to_dict(), False)
+        else:
+            return forgot_password(request.form.to_dict(), True)
     else:
-        return forgot_password(request.form.to_dict(),True)
+        abort(400)
 
 
 @app.route('/update_temp', methods=['POST'])

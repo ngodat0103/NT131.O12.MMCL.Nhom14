@@ -23,8 +23,10 @@ general_statements: dict[str, str] = {
     'create_account': "insert into mobile_project.account(`username_primary`,`hashed_password`,`email`) values(%s,%s,"
                       "%s)",
     "update_otp": "UPDATE `mobile_project`.`account` SET `reset_password` = '1',otp_code=%s WHERE (`username_primary` = %s);",
-    "check_valid_otp":"select * from account where "
-                      "reset_password = true and "
-                      "otp_code =%s and "
-                      "username_primary=%s"
+    "check_valid_otp": "select * from account where "
+                       "reset_password = true and "
+                       "otp_code =%s and "
+                       "username_primary=%s",
+    "update_otp_android_project": "insert into otp_email(`email`,`otp_code`,`expire`) values (%s,%s,%s);",
+    "check_otp_android_project": "select * from otp_email where email=%s and otp_code=%s and expire > %s"
 }
