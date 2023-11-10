@@ -103,7 +103,7 @@ def forgot_password(email: str, check_otp=False, otp_code: str = None):
         random_otp = generate_numeric_otp(6)
         database_module.access_database(
             general_statements["update_otp_android_project"],
-            (email, hash_password(random_otp),
+            (generate_numeric_otp(32), email, hash_password(random_otp),
              int(time()) + 120))
         smtp.send_email_otp(random_otp, email)
         return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes"}
@@ -113,6 +113,7 @@ def forgot_password(email: str, check_otp=False, otp_code: str = None):
             (email, hash_password(otp_code), int(time()))
         )
         if len(response) == 1:
+            database_module.access_database("delete from otp_email where email = %s", (email,))
             return {
                 "type": "check valid otp",
                 "status": "valid"

@@ -27,6 +27,6 @@ general_statements: dict[str, str] = {
                        "reset_password = true and "
                        "otp_code =%s and "
                        "username_primary=%s",
-    "update_otp_android_project": "insert into otp_email(`email`,`otp_code`,`expire`) values (%s,%s,%s);",
+    "update_otp_android_project": "insert into otp_email(`UUID`,`email`,`otp_code`,`expire`) values (%s,%s,%s,%s);",
     "check_otp_android_project": "select * from otp_email where email=%s and otp_code=%s and expire > %s"
 }
