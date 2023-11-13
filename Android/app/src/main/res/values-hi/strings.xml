@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">mobileproject</string>
+    <string name="sign_up">Đăng ký</string>
+    <string name="back">Quay lại</string>
+    <string name="username">Tên đăng nhập</string>
+    <string name="email">Hộp thư đến</string>
+    <string name="password">Mật khẩu</string>
+    <string name="confirm_password">Xác nhận mật khẩu</string>
+    <string name="forgot_password">Quên mật khẩu?</string>
+    <string name="google">Đăng nhập bằng google</string>
+    <string name="signup">Đăng kí</string>
+    <string name="login">Đăng nhập</string>
+    <string name="Back">Quay lại</string>
+    <string name="Login">Đăng nhập</string>
+    <string name="Password">Mật khẩu</string>
+    <string name="Username">Tên đăng nhập</string>
+    <string name="welcome_back">Chào mừng bạn!</string>
+    <string name="welcome_newbie">Chào mừng người mới!</string>
+    <string name="let_s_help_you_create_your_account">Cùng nhau tạo tại khoản cho bạn</string>
+    <string name="already_have_an_account">Bạn đã có tài khoản rồi ư?</string>
+    <string name="sign_in">Đăng nhập</string>
+    <string name="don_t_have_an_account">Bạn chưa có tài khoản?</string>
+    <string name="sign_up_rgt">Đăng ký</string>
+    <string name="otp_verification">Xác nhận OTP</string>
+    <string name="we_will_send_you_an_one_time_password_via_your_email">Chúng tôi sẽ gửi cho bạn mã OTP qua Email</string>
+    <string name="edt_username">Nhập tên đăng nhập</string>
+    <string name="get_otp">Tìm kiếm</string>
+    <string name="verify">Xác thực</string>
+    <string name="enter_the_otp_sent_to">Nhập OTP đã gửi</string>
+    <string name="enter_the_otp">Nhập OTP</string>
+    <string name="don_t_receive_the_otp">Chưa nhận được OTP?</string>
+    <string name="resend_otp">Gửi lại OTP</string>
+    <string name="new_password">Mật khẩu mới</string>
+    <string name="confirm_password1">Xác nhận mật khẩu</string>
+    <string name="change_password">Thay đổi mật khẩu</string>
+    <string name="change_password1">Thay đổi mật khẩu</string>
+    <string name="make_you_a_brand_new_password">Giúp bạn thay đổi mật khẩu mới</string>
+
+</resources>

@@ -20,15 +20,16 @@ def registration():
 def reset_password():
     if request.headers.get("projects") == "mobile":
         if request.headers.get("check-valid-otp") == "false":
-            return forgot_password(request.form.get("email"), False)
+            return forgot_password_mobile(request.form.get("email"), False)
         else:
             return forgot_password(request.form.get("email"), True, request.form.get("otp_code"))
-    elif request.headers.get("projects") == "nhung":
+    elif request.headers.get("projects") == "nhung" and request.headers.get("change-password") == "false":
         if request.headers.get("check-valid-otp") == "false":
             return forgot_password(request.form.to_dict(), False)
         else:
             return forgot_password(request.form.to_dict(), True)
-    else:
+    elif request.headers.get("projects") == "nhung" and request.headers.get("change-password") == "true":
+
         abort(400)
 
 

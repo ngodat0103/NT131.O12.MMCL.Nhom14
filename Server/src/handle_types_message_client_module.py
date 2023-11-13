@@ -9,6 +9,8 @@ import database_module
 from cipher_module import hash_password
 from sqlalchemy import create_engine
 from time import time
+import datetime
+import pandas as pd
 
 
 def authentication(argument: dict) -> dict[str, str]:
@@ -67,21 +69,22 @@ def forgot_password(argument: dict = None, check_otp=False):
     if check_otp is False:
         response = database_module.access_database(
             general_statements["forgot_password"],
-            (argument["email"], argument["username_primary"])
+            (argument["username_primary"],)
         )
         if len(response) == 1:
             random_otp = generate_numeric_otp(6)
             database_module.access_database(
                 general_statements["update_otp"],
-                (hash_password(random_otp), argument["username_primary"])
+                (hash_password(random_otp), int(time() + 120), argument["username_primary"])
             )
-            smtp.send_email_otp(random_otp, argument["email"])
-        return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes"}
+            smtp.send_email_otp(random_otp, response[0][1])
+        return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes", "email": response[0][1]}
     else:
         response = database_module.access_database(
             general_statements["check_valid_otp"],
             (
                 hash_password(str(argument["otp_code"])),
+                int(time()),
                 argument["username_primary"],
             )
         )
@@ -94,11 +97,11 @@ def forgot_password(argument: dict = None, check_otp=False):
             return {
                 "type": "check valid otp",
                 "status": "failed",
-                "reason": "invalid otp"
+                "reason": "invalid or expired OTP"
             }
 
 
-def forgot_password(email: str, check_otp=False, otp_code: str = None):
+def forgot_password_mobile(email: str, check_otp=False, otp_code: str = None):
     if check_otp is False:
         random_otp = generate_numeric_otp(6)
         database_module.access_database(
@@ -144,18 +147,12 @@ def load_profile_image(argument: dict):
             "large_data": "true"}
 
 
-import pandas as pd
-
-
 def get_weather_data(argument: dict):
     fullstatement: str = general_statements["get_weather"]
     engine = create_engine('mysql+mysqlconnector://', creator=lambda: database_module.mysql_connection)
     response_from_mysql_dataframe = pd.read_sql(fullstatement, engine)
     weather_data_firstrow_dataframe: pandas.DataFrame = response_from_mysql_dataframe.iloc[0]
     return {"type": "get_weather", "status": "success", "weather_data": weather_data_firstrow_dataframe.to_json()}
-
-
-import datetime
 
 
 def update_temp(argument: dict):
@@ -175,6 +172,14 @@ def get_temp(argument: dict = None):
     fullstatement: str = general_statements['get_temp']
     response_from_mysql = database_module.access_database(fullstatement)
     return {"type": "get_temp", "temp": response_from_mysql[0][0]}
+
+
+def change_password(argument: dict):
+    response = database_module.access_database(
+        general_statements["change_password"],
+        (hash_password(argument["new_password"]), argument["username_primary"])
+    )
+    print(response)
 
 
 type_client_message = {

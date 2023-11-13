@@ -22,6 +22,7 @@ mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
 
 def access_database(statement: str, param_any=None):
     execute_command_interpreter = mysql_connection.cursor()
+    print(statement)
     execute_command_interpreter.execute(statement, param_any)
     print(execute_command_interpreter.statement)
     response_tuple = execute_command_interpreter.fetchall()
