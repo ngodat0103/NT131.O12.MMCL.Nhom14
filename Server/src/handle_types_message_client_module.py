@@ -78,7 +78,9 @@ def forgot_password(argument: dict = None, check_otp=False):
                 (hash_password(random_otp), int(time() + 120), argument["username_primary"])
             )
             smtp.send_email_otp(random_otp, response[0][1])
-        return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes", "email": response[0][1]}
+            return {"type": "reset password", "status": "otp_sent", "expire": "in 2 minutes", "email": response[0][1]}
+        else:
+            return {"type": "reset password", "status": "failed", "reason": "Account didn't exist"}
     else:
         response = database_module.access_database(
             general_statements["check_valid_otp"],

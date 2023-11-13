@@ -99,7 +99,8 @@ public class ForgotPassword extends AppCompatActivity {
 
                     Map<String,String> headers = new HashMap<>();
                     headers.put("check-valid-otp","false");
-                    headers.put("projects:","nhung");
+                    headers.put("projects","nhung");
+                    headers.put("change-password","false");
 
 
                     Thread forgot_password_thread = new Thread(new Runnable() {
@@ -108,7 +109,7 @@ public class ForgotPassword extends AppCompatActivity {
                             Map<String,String> response  = new HashMap<>();
                             try {
                                 CustomRequest forgot_password_request = new CustomRequest(
-                                        "http:10.0.2.2/reset_password",
+                                        "https://server.uitprojects.com/reset_password",
                                         "POST",
                                         headers,
                                         parameters
@@ -123,17 +124,17 @@ public class ForgotPassword extends AppCompatActivity {
                                             EditText otp_edt = findViewById(R.id.edt_otp_code);
                                             Button verify_btn = findViewById(R.id.btn_verify);
                                             headers.put("check-valid-otp","true");
-                                            parameters.put("otp_code",otp_edt.getText().toString());
                                             verify_btn.setOnClickListener(new View.OnClickListener() {
                                                 @Override
                                                 public void onClick(View v) {
+                                                    parameters.put("otp_code",otp_edt.getText().toString());
                                                     Thread check_otp_Thread = new Thread(new Runnable() {
                                                         Map<String,String> response;
                                                         @Override
                                                         public void run() {
                                                             try {
                                                                 CustomRequest check_valid_otp = new CustomRequest(
-                                                                        "http:10.0.2.2/reset_password",
+                                                                        "https://server.uitprojects.com/reset_password",
                                                                         "POST",
                                                                         headers,
                                                                         parameters
@@ -144,24 +145,65 @@ public class ForgotPassword extends AppCompatActivity {
                                                                         @Override
                                                                         public void run() {
                                                                             setContentView(R.layout.new_password_layout);
+                                                                            Toast.makeText(getApplicationContext(),"Enter your new password",Toast.LENGTH_SHORT).show();
                                                                             Button change_password_btn = findViewById(R.id.btn_change_password);
                                                                             EditText new_password = findViewById(R.id.edt_new_password);
                                                                             EditText new_confirm_password = findViewById(R.id.edt_confirm_new_password);
                                                                             change_password_btn.setOnClickListener(new View.OnClickListener() {
                                                                                 @Override
                                                                                 public void onClick(View v) {
-
+                                                                                    if (new_password.getText().toString().equals(new_confirm_password.getText().toString())) {
+                                                                                        Map<String, String> parameters = new HashMap<>();
+                                                                                        Map<String, String> headers = new HashMap<>();
+                                                                                        headers.put("projects", "nhung");
+                                                                                        headers.put("change-password", "true");
+                                                                                        parameters.put("username_primary", username_edt.getText().toString());
+                                                                                        parameters.put("new_password", new_password.getText().toString());
+                                                                                        Thread change_password_Thread = new Thread(new Runnable() {
+                                                                                            @Override
+                                                                                            public void run() {
+                                                                                                try {
+                                                                                                    CustomRequest change_password = new CustomRequest(
+                                                                                                            "https://server.uitprojects.com/reset_password",
+                                                                                                            "POST",
+                                                                                                            headers,
+                                                                                                            parameters
+                                                                                                    );
+                                                                                                    response =  change_password.sendRequest();
+                                                                                                    if(Objects.equals(response.get("status"), "success"))
+                                                                                                        ui_handle.post(new Runnable() {
+                                                                                                            @Override
+                                                                                                            public void run() {
+                                                                                                                Toast.makeText(getApplicationContext(),"Change password successfully",Toast.LENGTH_SHORT).show();
+                                                                                                                finish();
+                                                                                                            }
+                                                                                                        });
+                                                                                                } catch (
+                                                                                                        IOException e) {
+                                                                                                    throw new RuntimeException(e);
+                                                                                                }
+                                                                                            }
+                                                                                        });
+                                                                                        change_password_Thread.start();
+                                                                                    }
+                                                                                    else
+                                                                                        Toast.makeText(getApplicationContext(),"password don't match",Toast.LENGTH_SHORT).show();
                                                                                 }
                                                                             });
                                                                         }
                                                                     });
 
                                                                 }
+                                                                else{
+                                                                    Toast.makeText(getApplicationContext(), response.get("reason"),Toast.LENGTH_SHORT).show();
+                                                                    finish();
+                                                                }
                                                             } catch (IOException e) {
                                                                 throw new RuntimeException(e);
                                                             }
                                                         }
                                                     });
+                                                    check_otp_Thread.start();
                                                 }
                                             });
                                         }
@@ -173,6 +215,7 @@ public class ForgotPassword extends AppCompatActivity {
                             }
                         }
                     });
+                    forgot_password_thread.start();
                 }
             }
         });

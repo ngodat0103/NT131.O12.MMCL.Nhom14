@@ -35,6 +35,7 @@ public class Login extends AppCompatActivity {
     EditText username_edt;
     EditText password_edt;
     Button login_btn,back_btn;
+    TextView forgot_password_edt;
     Handler ui_handle = new Handler();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +43,14 @@ public class Login extends AppCompatActivity {
         setContentView(R.layout.activity_login);
         username_edt = findViewById(R.id.edt_username);
         password_edt = findViewById(R.id.edt_password);
+        forgot_password_edt = findViewById(R.id.txtview_forgot_password);
+        forgot_password_edt.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent forgot_password = new Intent(getApplicationContext(),ForgotPassword.class);
+                startActivity(forgot_password);
+            }
+        });
         back_btn = findViewById(R.id.btn_back);
         login_btn = findViewById(R.id.btn_login);
         login_btn.setOnClickListener(new View.OnClickListener() {
