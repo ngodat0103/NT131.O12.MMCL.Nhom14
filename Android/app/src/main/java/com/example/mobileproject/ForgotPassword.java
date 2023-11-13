@@ -195,8 +195,13 @@ public class ForgotPassword extends AppCompatActivity {
 
                                                                 }
                                                                 else{
-                                                                    Toast.makeText(getApplicationContext(), response.get("reason"),Toast.LENGTH_SHORT).show();
-                                                                    finish();
+                                                                    ui_handle.post(new Runnable() {
+                                                                        @Override
+                                                                        public void run() {
+                                                                            Toast.makeText(getApplicationContext(), response.get("reason"),Toast.LENGTH_SHORT).show();
+
+                                                                        }
+                                                                    });
                                                                 }
                                                             } catch (IOException e) {
                                                                 throw new RuntimeException(e);
@@ -209,6 +214,16 @@ public class ForgotPassword extends AppCompatActivity {
                                         }
                                     });
                                 }
+                                else {
+                                    Map<String, String> finalResponse = response;
+                                    ui_handle.post(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            Toast.makeText(getApplicationContext(), finalResponse.get("reason"),Toast.LENGTH_SHORT).show();
+                                        }
+                                    });
+                                }
+
 
                             } catch (IOException e) {
                                 throw new RuntimeException(e);
