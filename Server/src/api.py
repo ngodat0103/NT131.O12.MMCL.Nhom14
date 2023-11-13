@@ -29,7 +29,8 @@ def reset_password():
         else:
             return forgot_password(request.form.to_dict(), True)
     elif request.headers.get("projects") == "nhung" and request.headers.get("change-password") == "true":
-
+        return change_password(request.form.to_dict())
+    else:
         abort(400)
 
 

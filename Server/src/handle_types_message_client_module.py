@@ -175,25 +175,10 @@ def get_temp(argument: dict = None):
 
 
 def change_password(argument: dict):
-    response = database_module.access_database(
-        general_statements["change_password"],
-        (hash_password(argument["new_password"]), argument["username_primary"])
-    )
-    print(response)
-
-
-type_client_message = {
-    "authentication": authentication,
-    "create_account": create_account,
-    "forgot_password": forgot_password,
-    "upload_image_profile": upload_image_profile,
-    "load_profile_image": load_profile_image,
-    "get_weather_data": get_weather_data,
-    "update_temp": update_temp,
-    "get_temp": get_temp
-}
-
-test_forgot_password = {
-    "username_primary": "test_account1",
-    "email": "ngovuminhdat@gmail.com"
-}
+    try:
+        response = database_module.access_database(
+            general_statements["change_password"],
+            (hash_password(argument["new_password"]), argument["username_primary"]))
+    except:
+        return {"status": "Something is not right"}
+    return {"status": "success", "type": "reset password"}
