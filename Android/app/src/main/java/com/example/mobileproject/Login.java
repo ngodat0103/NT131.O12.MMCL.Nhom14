@@ -35,6 +35,7 @@ public class Login extends AppCompatActivity {
     EditText username_edt;
     EditText password_edt;
     Button login_btn,back_btn;
+    TextView signup_txtview;
     TextView forgot_password_edt;
     Handler ui_handle = new Handler();
     @Override
@@ -44,6 +45,20 @@ public class Login extends AppCompatActivity {
         username_edt = findViewById(R.id.edt_username);
         password_edt = findViewById(R.id.edt_password);
         forgot_password_edt = findViewById(R.id.txtview_forgot_password);
+
+
+        signup_txtview = findViewById(R.id.txtview_sign_up);
+        signup_txtview.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent register = new Intent(getApplicationContext(),Register.class);
+                startActivity(register);
+            }
+        });
+
+
+
+
         forgot_password_edt.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -51,7 +66,6 @@ public class Login extends AppCompatActivity {
                 startActivity(forgot_password);
             }
         });
-        back_btn = findViewById(R.id.btn_back);
         login_btn = findViewById(R.id.btn_login);
         login_btn.setOnClickListener(new View.OnClickListener() {
             @Override
