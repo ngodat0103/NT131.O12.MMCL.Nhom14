@@ -38,6 +38,13 @@ public class Login extends AppCompatActivity {
     TextView signup_txtview;
     TextView forgot_password_edt;
     Handler ui_handle = new Handler();
+
+    @Override
+    protected void onRestart() {
+        recreate();
+        super.onRestart();
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -92,6 +99,10 @@ public class Login extends AppCompatActivity {
                                     @Override
                                     public void run() {
                                         Toast.makeText(getApplicationContext(), "Login OK", Toast.LENGTH_SHORT).show();
+                                        Intent dashboard = new Intent(getApplicationContext(),Dashboard.class);
+                                        dashboard.putExtra("image_profile",response.get("image_profile"));
+                                        dashboard.putExtra("refresh_token",response.get("refresh_token"));
+                                        startActivity(dashboard);
                                     }
                                 });
 
@@ -113,5 +124,42 @@ public class Login extends AppCompatActivity {
             }
         });
 
+
+
+        spinner = findViewById(R.id.spinner);
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, languages);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+        spinner.setSelection(0);
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedLang = parent.getItemAtPosition(position).toString();
+                if(selectedLang.equals("English")){
+                    setLocal(Login.this, "en");
+                    finish();
+                    startActivity(getIntent());
+                }else if(selectedLang.equals("Vietnamese")){
+                    setLocal(Login.this, "hi");
+                    finish();
+                    startActivity(getIntent());
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
     }
+    public void setLocal(Activity activity, String langCode){
+        Locale locale = new Locale(langCode);
+        locale.setDefault(locale);
+        Resources resources = activity.getResources();
+        Configuration config = resources.getConfiguration();
+        config.setLocale(locale);
+        resources.updateConfiguration(config,resources.getDisplayMetrics());
+    }
+
+
 }

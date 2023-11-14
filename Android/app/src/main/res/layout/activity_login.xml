@@ -32,6 +32,7 @@
             android:layout_marginBottom="20dp"
             android:background="@drawable/custom_edt"
             android:padding="10dp"
+            android:text="test_account1"
             android:ems="15"
             android:hint="@string/Username"
             android:textSize="20dp" />
@@ -39,6 +40,7 @@
         <EditText
             android:id="@+id/edt_password"
             android:layout_width="wrap_content"
+            android:text="123456789"
             android:layout_height="wrap_content"
             android:layout_marginBottom="5dp"
             android:background="@drawable/custom_edt"
