@@ -6,7 +6,7 @@ import os
 
 USERNAME = os.getenv("username_mysql")
 PASSWORD = os.getenv("password_mysql")
-HOST = "app.mariadb.uitprojects.com"
+HOST = "mariadb"
 PORT = 3306
 DATABASE = "mobile_project"
 SSL_CERT = os.getenv("ssl_client_cert")
