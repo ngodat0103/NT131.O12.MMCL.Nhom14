@@ -16,6 +16,7 @@ mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
                                            host=HOST,
                                            database='mobile_project',
                                            ssl_cert=SSL_CERT,
+
                                            ssl_key=SSL_key, )
 
 
