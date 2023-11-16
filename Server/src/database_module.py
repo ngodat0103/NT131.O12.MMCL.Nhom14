@@ -4,7 +4,6 @@ import io
 import mysql.connector
 import os
 
-
 USERNAME = os.getenv("username_mysql")
 PASSWORD = os.getenv("password_mysql")
 HOST = "app.mariadb.uitprojects.com"
@@ -28,3 +27,22 @@ def access_database(statement: str, param_any=None):
     response_tuple = execute_command_interpreter.fetchall()
     mysql_connection.commit()
     return response_tuple
+
+
+def test():
+    response_mysql = access_database("SELECT dt,temp,humidity FROM mobile_project.weather_data;")
+    import requests
+
+    for element in response_mysql:
+        header = {
+            "Content-type": "application/json"
+        }
+        body = {
+            "ts": str(element[0]),
+            "temperature": str(element[1]),
+            "humidity": str(element[2])
+        }
+        response_http = requests.post("https://thingsboard.uitprojects.com/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
+                                      headers=header, json=body)
+        print(element)
+        print(response_http.status_code)
