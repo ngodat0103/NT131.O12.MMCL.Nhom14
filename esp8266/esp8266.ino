@@ -42,25 +42,25 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
   WiFiClient client;
+
+}
+
+void loop() {
+  static bool wait = false;
+  int temp = 34; 
+  int humidity = 60;
+  WiFiClient client;
+
   if (!client.connect(host, port)) {
     Serial.println("connection failed");
     delay(5000);
     return;
   }
-  else {
-        Serial.println("connection OK");
-  }
-  int temp = 78; 
-  int humidity = 90;
+  Serial.println("Connection Ok");
   client.write(lowByte(temp));
   client.write(highByte(temp));
   client.write(lowByte(humidity));
   client.write(highByte(humidity));
-
   client.flush();
-  client.stop();
-}
-
-void loop() {
-  static bool wait = false;
+  delay(1000);
 }
