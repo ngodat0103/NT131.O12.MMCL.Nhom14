@@ -35,6 +35,28 @@ def receive(length: int) -> bytes:
 print("Server is listening from Arduino")
 
 client_socket, ip_address = server.accept()
+print("Connect from " + ip_address[0])
 while True:
-    temp = int.from_bytes(receive(4), byteorder="little", signed=True)
-    print(f"temp: + {temp}")
+    temp_bytes = receive(2)
+    if temp_bytes == b"":
+        client_socket.shutdown(socket.SHUT_RDWR)
+        client_socket.close()
+        break
+    humidity_bytes = receive(2)
+
+    temp_int = int.from_bytes(temp_bytes, byteorder="little", signed=True)
+    humidity_int = int.from_bytes(humidity_bytes, byteorder="little", signed=True)
+
+    header = {
+        "Content-type":"application/json"
+    }
+    json_dict = {
+        "humidity":str(humidity_int),
+        "temperature":str(temp_int),
+    }
+    json_data = json.dumps(json_dict)
+    response = requests.post("https://thingsboard.uitprojects.com/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry", data=json_data,
+                  headers=header)
+    print(response.status_code)
+    print(f"Temp: {temp_int}")
+    print(f"Humidity: {humidity_int}")
