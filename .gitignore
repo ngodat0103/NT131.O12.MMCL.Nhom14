@@ -3,3 +3,5 @@ Client/src/venv/
 Server/src/.idea/
 Server/src/venv/
 Server/src/__pycache__/
+Script/mariadb/self_ssl/
+Script/nginx/ssl/

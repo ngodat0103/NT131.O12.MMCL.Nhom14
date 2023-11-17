@@ -4,7 +4,11 @@ app = Flask(__name__)
 
 # app.run()
 from handle_types_message_client_module import *
+from werkzeug.middleware.proxy_fix import ProxyFix
 
+app.wsgi_app = ProxyFix(
+    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
+)
 
 @app.route('/authentication', methods=['POST'])
 def login():
@@ -22,14 +26,15 @@ def reset_password():
         if request.headers.get("check-valid-otp") == "false":
             return forgot_password_mobile(request.form.get("email"), False)
         else:
-            return forgot_password(request.form.get("email"), True, request.form.get("otp_code"))
-    elif request.headers.get("projects") == "nhung" and request.headers.get("change-password") == "false":
-        if request.headers.get("check-valid-otp") == "false":
-            return forgot_password(request.form.to_dict(), False)
-        else:
             return forgot_password(request.form.to_dict(), True)
-    elif request.headers.get("projects") == "nhung" and request.headers.get("change-password") == "true":
-        return change_password(request.form.to_dict())
+    elif request.headers.get("projects") == "nhung":
+        if request.headers.get("change-password") == "false":
+            if request.headers.get("check-valid-otp") == "false":
+                return forgot_password(request.form.to_dict(), False)
+            else:
+                return forgot_password(request.form.to_dict(), True)
+        else:
+            return change_password(request.form.to_dict())
     else:
         abort(400)
 

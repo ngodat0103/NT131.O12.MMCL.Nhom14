@@ -54,7 +54,7 @@ def create_account(argument: dict) -> dict[str, str]:
     full_statement = general_statements["create_account"]
     params = (
         argument["username_primary"],
-        argument["password"],
+        hash_password(argument["password"]),
         argument["email"]
     )
     try:
