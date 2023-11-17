@@ -4,11 +4,11 @@ plugins {
 }
 
 android {
-    namespace = "me.ngodat0103.myapplication"
+    namespace = "com.example.mobileproject"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "me.ngodat0103.myapplication"
+        applicationId = "com.example.mobileproject"
         minSdk = 28
         targetSdk = 33
         versionCode = 1
@@ -30,6 +30,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
     }
+    buildToolsVersion = "33.0.1"
 }
 
 dependencies {
