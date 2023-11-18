@@ -14,7 +14,7 @@ DHTesp dht;
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
-const char* host = "192.168.1.2";
+const char* host = "192.168.1.120";
 const uint16_t port = 80;
 
 void setup() {
@@ -52,10 +52,10 @@ void loop() {
   float temp = dht.getTemperature();
   float humidity = dht.getHumidity();
 
-  Serial.print("{\"humidity\": ");
-  Serial.print(humidity);
-  Serial.print(", \"temp\": ");
-  Serial.print(temp);
+  Serial.print("humidity: ");
+  Serial.println(humidity);
+  Serial.print("temperature: ");
+  Serial.println(temp);
   Serial.print("}\n");
 
 
