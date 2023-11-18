@@ -4,7 +4,8 @@
 */
 
 #include <ESP8266WiFi.h>
-
+#include "DHTesp.h"
+DHTesp dht;
 #ifndef STASSID
 #define STASSID "Akira"
 #define STAPSK "Cubin159753"
@@ -13,7 +14,7 @@
 const char* ssid = STASSID;
 const char* password = STAPSK;
 
-const char* host = "192.168.1.120";
+const char* host = "192.168.1.2";
 const uint16_t port = 80;
 
 void setup() {
@@ -42,25 +43,43 @@ void setup() {
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
   WiFiClient client;
+  Serial.begin(115200);
+  dht.setup(D2, DHTesp::DHT22);
 
 }
 
 void loop() {
-  static bool wait = false;
-  int temp = 34; 
-  int humidity = 60;
+  float temp = dht.getTemperature();
+  float humidity = dht.getHumidity();
+
+  Serial.print("{\"humidity\": ");
+  Serial.print(humidity);
+  Serial.print(", \"temp\": ");
+  Serial.print(temp);
+  Serial.print("}\n");
+
+
+  byte* bytePointer = (byte*) &temp;
   WiFiClient client;
 
   if (!client.connect(host, port)) {
     Serial.println("connection failed");
-    delay(5000);
+    delay(5000);  
     return;
   }
+  for (int i = 0; i <=3; i++) {
+    client.write(bytePointer[i]);
+  }
+  bytePointer = (byte*) &humidity;
+  for(int i = 0 ; i<=3;i++){
+    client.write(bytePointer[i]);
+  }
   Serial.println("Connection Ok");
-  client.write(lowByte(temp));
-  client.write(highByte(temp));
-  client.write(lowByte(humidity));
-  client.write(highByte(humidity));
+  
   client.flush();
+  client.stop();
   delay(1000);
 }
+
+
+
