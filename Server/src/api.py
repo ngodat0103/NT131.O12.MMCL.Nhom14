@@ -1,49 +1,44 @@
-from flask import abort, redirect, url_for, Flask, request
+from typing import Union, Annotated
+import uvicorn
+from fastapi import FastAPI, Form, Body
+from pydantic import BaseModel
 
-app = Flask(__name__)
-
-# app.run()
+app = FastAPI()
 from handle_types_message_client_module import *
-from werkzeug.middleware.proxy_fix import ProxyFix
-
-app.wsgi_app = ProxyFix(
-    app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1
-)
-
-@app.route('/authentication', methods=['POST'])
-def login():
-    return authentication(request.form.to_dict())
 
 
-@app.route("/registration", methods=['POST'])
-def registration():
-    return create_account(request.form.to_dict())
+@app.get("/")
+def read_root():
+    return {"Hello": "World"}
 
 
-@app.route("/reset_password", methods=['POST'])
-def reset_password():
-    if request.headers.get("projects") == "mobile":
-        if request.headers.get("check-valid-otp") == "false":
-            return forgot_password_mobile(request.form.get("email"), False)
-        else:
-            return forgot_password(request.form.to_dict(), True)
-    elif request.headers.get("projects") == "nhung":
-        if request.headers.get("change-password") == "false":
-            if request.headers.get("check-valid-otp") == "false":
-                return forgot_password(request.form.to_dict(), False)
-            else:
-                return forgot_password(request.form.to_dict(), True)
-        else:
-            return change_password(request.form.to_dict())
-    else:
-        abort(400)
+@app.post("/authentication")
+async def login(username_primary: Annotated[str, Form()],
+                password: Annotated[str, Form()],
+                device_name: Annotated[str, Form()],
+                refresh_token: Annotated[str, Form()]
+                ):
+    return authentication_credential(username_primary, password, device_name, refresh_token)
 
 
-@app.route('/update_temp', methods=['POST'])
-def update():
-    return update_temp(request.form.to_dict())
+@app.post("/registration")
+async def registration(
+        username_primary: Annotated[str, Form()],
+        password: Annotated[str, Form()],
+        email: Annotated[str, Form()]
+):
+    return create_account(username_primary, password, email)
 
 
-@app.route("/current_temp", methods=['GET'])
-def current_temp():
+@app.get("/current_temp")
+async def current_temp():
     return get_temp()
+
+
+@app.post("/update_temp")
+async def temp_update(temp: Annotated[str, Form()],
+                      time_primary: Annotated[int, Form()]
+                      ):
+    return update_temp(time_primary, temp)
+
+

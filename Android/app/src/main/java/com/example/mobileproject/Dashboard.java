@@ -28,26 +28,6 @@ public class Dashboard extends AppCompatActivity {
     @Override
     protected void onStart() {
       //  get_temp_Thread.start();
-        WebSettings webSettings = webview.getSettings();
-        webSettings.setSupportMultipleWindows(true);
-        webSettings.setDomStorageEnabled(true);
-        webSettings.setDatabaseEnabled(true);
-        webSettings.setAllowFileAccess(true);
-        webSettings.setAllowContentAccess(true);
-        webSettings.setAllowFileAccess(true);
-        webSettings.setUseWideViewPort(true);
-        webSettings.setSupportZoom(true);
-        webSettings.setLoadWithOverviewMode(true);
-        webSettings.setJavaScriptEnabled(true);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(false);
-        webSettings.setUseWideViewPort(true);
-        webview.setWebViewClient(new WebViewClient(){
-            @Override
-            public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
-                return super.shouldOverrideUrlLoading(view, request);
-            }
-        });
-        webview.loadUrl("https://thingsboard.uitprojects.com/dashboard/68a24050-82fb-11ee-a39a-35af10aeb1a4?publicId=d53676f0-839b-11ee-a8a5-8f2584240217");
         super.onStart();
     }
 
@@ -62,9 +42,6 @@ public class Dashboard extends AppCompatActivity {
         avatar_imgview.setImageBitmap(img_Bitmap);
         temp_txtview = findViewById(R.id.txtview_temp);
         webview = findViewById(R.id.webview);
-
-
-
 
 
 
