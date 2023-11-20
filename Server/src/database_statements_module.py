@@ -18,8 +18,8 @@ general_statements: dict[str, str] = {
     'get_weather': "SELECT * FROM mobile_project.weather_api order by date_primarykey desc",
     'update_token': "INSERT INTO `mobile_project`.`devices`(`uuid`,`device_name`,`username_foreignkey`,`refresh_token`)"
                     "VALUES(%s,%s,%s,%s);",
-    'update_temp': "insert into `mobile_project`.`raspberry`(`time_primary`,`time_readable`,`temp`)VALUES(%s,%s,%s)",
-    'get_temp': "select temp from mobile_project.raspberry order by time_primary desc limit 1",
+    'update_temp': "insert into `mobile_project`.`raspberry`(`time_primary`,`time_readable`,`temperature`,`humidity`)VALUES(%s,%s,%s,%s)",
+    'get_temp': "select temperature,humidity,time_primary from mobile_project.raspberry order by time_primary desc limit 1",
     'create_account': "insert into mobile_project.account(`username_primary`,`hashed_password`,`email`) values(%s,%s,"
                       "%s)",
     "update_otp": "UPDATE `mobile_project`.`account` SET `reset_password` = '1',otp_code=%s,expire=%s WHERE (`username_primary` = %s);",

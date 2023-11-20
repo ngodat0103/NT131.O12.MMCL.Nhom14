@@ -145,13 +145,14 @@ def get_weather_data(argument: dict):
     return {"type": "get_weather", "status": "success", "weather_data": weather_data_firstrow_dataframe.to_json()}
 
 
-def update_temp(time_primary: int, temp: str):
+def update_temp(time_primary: int, temperature: float, humidity: float):
     time_readable_str = datetime.datetime.fromtimestamp(time_primary).strftime("%d-%m-%Y: %H:%M:%S ")
     try:
         database_module.access_database(general_statements["update_temp"], (
             time_primary,
             time_readable_str,
-            temp
+            temperature,
+            humidity
         )
                                         )
     except mysql.connector.errors.IntegrityError:
@@ -159,10 +160,14 @@ def update_temp(time_primary: int, temp: str):
     return {"type": "update_temp", "status": "Ok"}
 
 
-def get_temp(argument: dict = None):
-    fullstatement: str = general_statements['get_temp']
-    response_from_mysql = database_module.access_database(fullstatement)
-    return {"type": "get_temp", "temp": response_from_mysql[0][0]}
+def get_temp():
+    response_from_mysql = database_module.access_database(general_statements["get_temp"])
+    return {
+        "type": "get_temp",
+        "time": response_from_mysql[0][2],
+        "temperature": response_from_mysql[0][0],
+        "humidity": response_from_mysql[0][1]
+    }
 
 
 def change_password(argument: dict):

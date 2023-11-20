@@ -1,4 +1,6 @@
 import json
+import time
+
 import requests
 import socket
 import numpy
@@ -39,7 +41,7 @@ while True:
             temp_str = str(temp_float[0])
             humidity_str = str(humidity_float[0])
 
-            header = {
+            headers = {
                 "Content-type": "application/json"
             }
             json_dict = {
@@ -47,12 +49,24 @@ while True:
                 "temperature": temp_str,
             }
             json_data = json.dumps(json_dict)
-            response = requests.post("https://thingsboard.uitprojects.com/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
-                                     data=json_data,
-                                     headers=header)
-            print("https code: " + str(response.status_code))
-            print(f"Temp: {temp_str}")
-            print(f"Humidity: {humidity_str}")
+            response1 = requests.post("https://thingsboard.uitprojects.com/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
+                                      data=json_data,
+                                      headers=headers)
+
+            headers["Content-type"] = "application/x-www-form-urlencoded"
+
+            json_dict = {
+                "humidity": humidity_str,
+                "temperature": temp_str,
+                "time_primary": int(time.time())
+            }
+            response2 = requests.post("https://server.uitprojects.com/update_temp",
+                                      data=json_dict,
+                                      headers=headers)
+
+
+
+
         except socket.timeout:
             client_socket.shutdown(socket.SHUT_RDWR)
             client_socket.close()
