@@ -64,7 +64,8 @@ while True:
                                       data=json_dict,
                                       headers=headers)
 
-
+            print(humidity_str)
+            print(temp_str)
 
 
         except socket.timeout:
