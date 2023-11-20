@@ -10,7 +10,7 @@ import java.nio.ByteOrder;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-        URL url = new URL("http://localhost/live-data");
+        URL url = new URL("https://server.uitprojects.com/live-data");
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
