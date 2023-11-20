@@ -1,5 +1,9 @@
-from gevent.pywsgi import WSGIServer
-from api import app
+from api import *
 
-http_server = WSGIServer(("0.0.0.0", 80), app)
-http_server.serve_forever()
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=80)
+
+
+
+

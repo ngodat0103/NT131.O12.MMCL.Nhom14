@@ -13,52 +13,40 @@ import datetime
 import pandas as pd
 
 
-def authentication(argument: dict) -> dict[str, str]:
-    refresh_token_str = argument.get("refresh_token")
-    if refresh_token_str is None:
-        full_statement_str = general_statements["authentication_credential"].format(
-            username_primary=argument["username_primary"],
-            hashed_password=hash_password(
-                argument["password"]))
-    else:
-        full_statement_str = general_statements["authentication_token"].format(refresh_token=argument["refresh_token"])
-
-    response_from_mysql = database_module.access_database(full_statement_str)
-    if response_from_mysql:
-        if refresh_token_str is None:
+def authentication_credential(username_primary: str, password: str, device_name: str, refresh_token: str) -> dict[
+    str, str]:
+    if refresh_token == "None":
+        response = database_module.access_database(
+            general_statements["authentication_credential"], (username_primary, hash_password(password))
+        )
+        if len(response) == 0:
+            return {"type": "login", "status": "failed", "reason": "username or password invalid"}
+        else:
             refresh_token_str = cipher_module.generate_random_token(32)
             uuid_str = cipher_module.generate_random_token(10)
-            update_token_fullstatement_str = general_statements["update_token"].format(
-                username_foreignkey=argument["username_primary"], device_name=argument["device_name"],
-                refresh_token=refresh_token_str, uuid=uuid_str)
-            database_module.access_database(update_token_fullstatement_str)
-            return {
-                "type": "login",
-                "status": "success",
-                "refresh_token": refresh_token_str,
-                "image_profile": base64.b64encode(response_from_mysql[0][3]).decode()
-            }
-
-        else:
-            print(response_from_mysql)
+            database_module.access_database(general_statements["update_token"], (
+                uuid_str,
+                device_name,
+                username_primary,
+                refresh_token_str
+            )
+                                            )
             return {"type": "login",
                     "status": "success",
                     "refresh_token": refresh_token_str,
-                    "image_profile": base64.b64encode(response_from_mysql[0][3]).decode()
+                    "image_profile": base64.b64encode(response[0][3]).decode()
                     }
-    else:
-        return {"type": "login", "status": "failed", "reason": "username or password invalid"}
 
 
-def create_account(argument: dict) -> dict[str, str]:
-    full_statement = general_statements["create_account"]
-    params = (
-        argument["username_primary"],
-        hash_password(argument["password"]),
-        argument["email"]
-    )
+def create_account(username_primary: str, password: str, email: str) -> dict[str, str]:
     try:
-        database_module.access_database(full_statement, params)
+        database_module.access_database(general_statements["create_account"],
+                                        (
+                                            username_primary,
+                                            hash_password(password),
+                                            email
+                                        )
+                                        )
     except mysql.connector.errors.IntegrityError as error:
         print(str(error))
         return {"status": "can't create account", "reason": str(error)}
@@ -157,23 +145,29 @@ def get_weather_data(argument: dict):
     return {"type": "get_weather", "status": "success", "weather_data": weather_data_firstrow_dataframe.to_json()}
 
 
-def update_temp(argument: dict):
-    fullstatement: str = general_statements["update_temp"]
-    time_primary_int: int = int(argument['time_primary'])
-    time_readable_str = datetime.datetime.fromtimestamp(time_primary_int).strftime("%d-%m-%Y: %H:%M:%S ")
-    params = (time_primary_int, time_readable_str, argument['temp'])
-    print(params)
+def update_temp(time_primary: int, temperature: float, humidity: float):
+    time_readable_str = datetime.datetime.fromtimestamp(time_primary).strftime("%d-%m-%Y: %H:%M:%S ")
     try:
-        database_module.access_database(fullstatement, params)
+        database_module.access_database(general_statements["update_temp"], (
+            time_primary,
+            time_readable_str,
+            temperature,
+            humidity
+        )
+                                        )
     except mysql.connector.errors.IntegrityError:
         return {"type": "update_temp", "status": "can't update", "reason": "duplicate primary key"}
     return {"type": "update_temp", "status": "Ok"}
 
 
-def get_temp(argument: dict = None):
-    fullstatement: str = general_statements['get_temp']
-    response_from_mysql = database_module.access_database(fullstatement)
-    return {"type": "get_temp", "temp": response_from_mysql[0][0]}
+def get_temp():
+    response_from_mysql = database_module.access_database(general_statements["get_temp"])
+    return {
+        "type": "get_temp",
+        "time": response_from_mysql[0][2],
+        "temperature": response_from_mysql[0][0],
+        "humidity": response_from_mysql[0][1]
+    }
 
 
 def change_password(argument: dict):
