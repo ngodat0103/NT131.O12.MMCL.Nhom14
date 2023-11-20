@@ -6,6 +6,10 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.os.Handler;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebSettings;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -19,10 +23,11 @@ public class Dashboard extends AppCompatActivity {
     TextView temp_txtview;
     Handler ui_Handler = new Handler();
     Thread get_temp_Thread;
+    WebView webview;
 
     @Override
     protected void onStart() {
-        get_temp_Thread.start();
+      //  get_temp_Thread.start();
         super.onStart();
     }
 
@@ -36,6 +41,18 @@ public class Dashboard extends AppCompatActivity {
         Bitmap img_Bitmap = BitmapFactory.decodeByteArray(img_bytes,0,img_bytes.length);
         avatar_imgview.setImageBitmap(img_Bitmap);
         temp_txtview = findViewById(R.id.txtview_temp);
+        webview = findViewById(R.id.webview);
+
+
+
+
+
+
+
+
+
+
+
         get_temp_Thread = new Thread(new Runnable() {
             @Override
             public void run() {
@@ -64,7 +81,12 @@ public class Dashboard extends AppCompatActivity {
 
                 }
             }
+
+
+
         });
+
+
 
     }
 }
