@@ -14,7 +14,6 @@ MESSAGE_STREAM_RETRY_TIMEOUT = 15000
 
 app = FastAPI()
 
-
 @app.get('/live-data')
 async def message_stream(request: Request):
     async def generator():
@@ -25,9 +24,11 @@ async def message_stream(request: Request):
             if response != latest:
                 temp_float32 = numpy.float32(response[0])
                 humidity_float32 = numpy.float32(response[1])
+                time_int = response[2]
                 data_bytes = b""
                 data_bytes += temp_float32.tobytes()
                 data_bytes += humidity_float32.tobytes()
+                data_bytes += time_int.to_bytes(byteorder="little", signed=True,length=4)
                 latest = response
                 yield data_bytes
             await asyncio.sleep(1)
