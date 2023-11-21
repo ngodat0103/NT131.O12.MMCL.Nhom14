@@ -1,6 +1,4 @@
 import base64
-import json
-
 import mysql.connector.errors
 import pandas
 from random_otp.generator import generate_numeric_otp
@@ -129,14 +127,14 @@ def upload_image_profile(argument: dict):
     return {"type": "upload_image_profile", "status": "success"}
 
 
-def load_profile_image(argument: dict):
-    fullstatement: str = general_statements["load_profile_image"].format(refresh_token=argument["refresh_token"])
+def load_profile_image(refresh_token: str) -> None | bytes:
+    response = database_module.access_database(general_statements["load_profile_image"],
+                                               (refresh_token,))
+    if len(response) == 0:
+        return None
+    load_image_bytes: bytes = response[0][0]
 
-    response_from_mysql_list = database_module.access_database(fullstatement)
-    load_image_bytes: bytes = response_from_mysql_list[0][0]
-
-    return {"type": "load_profile_image", "status": "pending_download", "large_file_size": str(len(load_image_bytes)),
-            "large_data": "true"}
+    return load_image_bytes
 
 
 def get_weather_data(argument: dict):
@@ -186,7 +184,7 @@ def history(left, right, order, limit):
         "to": right,
         "limit": limit,
         "length elements": None,
-        "order":order,
+        "order": order,
         "data": []
     }
     for current in response:

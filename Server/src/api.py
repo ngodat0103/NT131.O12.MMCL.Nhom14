@@ -1,15 +1,15 @@
 import asyncio
-import json
+import os
 from typing import Union, Annotated
-
 import numpy
-from fastapi import FastAPI, Form, Request, HTTPException
-from starlette.responses import StreamingResponse
+from fastapi import FastAPI, Form, Request, HTTPException, Response
+from starlette.responses import StreamingResponse, FileResponse
 from handle_types_message_client_module import *
+from database_module import lock
+import tempfile
 
 MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
-
 app = FastAPI()
 
 
@@ -33,6 +33,29 @@ async def message_stream(request: Request):
             await asyncio.sleep(1)
 
     return StreamingResponse(generator())
+
+
+@app.get("/image")
+async def get_image(refresh_token: str):
+    image_bytes = load_profile_image(refresh_token)
+    if image_bytes is None:
+        return {
+            "error": "account didn't have image"
+        }
+    return Response(image_bytes, media_type="image/png")
+
+
+@app.get("/image/download")
+async def get_image(refresh_token: str):
+    image_bytes = load_profile_image(refresh_token)
+    if image_bytes is None:
+        return {
+            "error": "account didn't have image or invalid token"
+        }
+    with lock:
+        with tempfile.TemporaryFile(dir=os.getcwd() + "/tmp/", delete=False, suffix=".png") as temp_file:
+            temp_file.write(image_bytes)
+            return FileResponse(temp_file.name, media_type="image/png", filename="userprofile.png")
 
 
 @app.post("/authentication")
