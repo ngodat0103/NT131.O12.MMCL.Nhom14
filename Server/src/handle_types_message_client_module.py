@@ -1,4 +1,6 @@
 import base64
+import json
+
 import mysql.connector.errors
 import pandas
 from random_otp.generator import generate_numeric_otp
@@ -34,7 +36,7 @@ def authentication_credential(username_primary: str, password: str, device_name:
             return {"type": "login",
                     "status": "success",
                     "refresh_token": refresh_token_str,
-                    "image_profile": base64.b64encode(response[0][3]).decode()
+                    "image_profile": base64.b64encode(response[0][3]).decode() if response[0][3] is not None else "None"
                     }
 
 
@@ -160,14 +162,42 @@ def update_temp(time_primary: int, temperature: float, humidity: float):
     return {"type": "update_temp", "status": "Ok"}
 
 
-def get_temp():
+def current():
     response_from_mysql = database_module.access_database(general_statements["get_temp"])
     return {
-        "type": "get_temp",
+        "type": "current time",
         "time": response_from_mysql[0][2],
         "temperature": response_from_mysql[0][0],
         "humidity": response_from_mysql[0][1]
     }
+
+
+def history(left, right, order, limit):
+    if limit == 0:
+        response = database_module.access_database(general_statements["history"].format(limit="", order=order),
+                                                   (left, right))
+    else:
+        response = database_module.access_database(
+            general_statements["history"].format(limit=f"limit {limit}", order=order), (left, right))
+
+    body = {
+        "type": "history",
+        "from": left,
+        "to": right,
+        "limit": limit,
+        "length elements": None,
+        "order":order,
+        "data": []
+    }
+    for current in response:
+        body["data"].append({
+            "time": current[2],
+            "temperature": current[0],
+            "humidity": current[1]
+        })
+    body["length elements"] = len(response)
+
+    return body
 
 
 def change_password(argument: dict):

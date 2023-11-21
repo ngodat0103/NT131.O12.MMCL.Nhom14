@@ -20,6 +20,8 @@ general_statements: dict[str, str] = {
                     "VALUES(%s,%s,%s,%s);",
     'update_temp': "insert into `mobile_project`.`raspberry`(`time_primary`,`time_readable`,`temperature`,`humidity`)VALUES(%s,%s,%s,%s)",
     'get_temp': "select temperature,humidity,time_primary from mobile_project.raspberry order by time_primary desc limit 1",
+    "history":"select temperature,humidity,time_primary from mobile_project.raspberry where time_primary>%s and time_primary <%s "
+              "order by time_primary {order} {limit} ",
     'create_account': "insert into mobile_project.account(`username_primary`,`hashed_password`,`email`) values(%s,%s,"
                       "%s)",
     "update_otp": "UPDATE `mobile_project`.`account` SET `reset_password` = '1',otp_code=%s,expire=%s WHERE (`username_primary` = %s);",
@@ -35,4 +37,5 @@ general_statements: dict[str, str] = {
                        "reset_password=false,"
                        "expire=null,otp_code=null "
                        "where username_primary=%s"
+
 }

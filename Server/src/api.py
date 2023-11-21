@@ -3,9 +3,7 @@ import json
 from typing import Union, Annotated
 
 import numpy
-import uvicorn
-from fastapi import FastAPI, Form, Request
-from pydantic import BaseModel
+from fastapi import FastAPI, Form, Request, HTTPException
 from starlette.responses import StreamingResponse
 from handle_types_message_client_module import *
 
@@ -13,6 +11,7 @@ MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
 
 app = FastAPI()
+
 
 @app.get('/live-data')
 async def message_stream(request: Request):
@@ -28,7 +27,7 @@ async def message_stream(request: Request):
                 data_bytes = b""
                 data_bytes += temp_float32.tobytes()
                 data_bytes += humidity_float32.tobytes()
-                data_bytes += time_int.to_bytes(byteorder="little", signed=True,length=4)
+                data_bytes += time_int.to_bytes(byteorder="little", signed=True, length=4)
                 latest = response
                 yield data_bytes
             await asyncio.sleep(1)
@@ -55,8 +54,16 @@ async def registration(
 
 
 @app.get("/current_temp")
-async def current_temp():
-    return get_temp()
+async def get_current_temp():
+    return current()
+
+
+@app.get("/history")
+async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc", limit: int = 1000):
+    if order == "desc" or order == "asc":
+        return history(left, right, order, limit)
+    else:
+        raise HTTPException(status_code=400, detail="order is invalid")
 
 
 @app.post("/update_temp")
