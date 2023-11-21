@@ -5,3 +5,4 @@ Server/src/venv/
 Server/src/__pycache__/
 Script/mariadb/self_ssl/
 Script/nginx/ssl/
+Server/src/tmp/

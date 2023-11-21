@@ -10,6 +10,7 @@ import tempfile
 
 MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
+TEMP_PATH = os.getcwd()+"/tmp/"
 app = FastAPI()
 
 
@@ -52,10 +53,10 @@ async def get_image(refresh_token: str):
         return {
             "error": "account didn't have image or invalid token"
         }
-    with lock:
-        with tempfile.TemporaryFile(dir=os.getcwd() + "/tmp/", delete=False, suffix=".png") as temp_file:
-            temp_file.write(image_bytes)
-            return FileResponse(temp_file.name, media_type="image/png", filename="userprofile.png")
+
+    with open(TEMP_PATH+"image_tmp.png",mode="wb") as temp_file:
+        temp_file.write(image_bytes)
+    return FileResponse(temp_file.name, media_type="image/png", filename="userprofile.png")
 
 
 @app.post("/authentication")
