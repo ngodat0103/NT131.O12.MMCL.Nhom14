@@ -10,8 +10,8 @@ import java.nio.ByteOrder;
 
 public class Main {
     public static void main(String[] args) throws IOException {
-       // URL url = new URL("https://server.uitprojects.com/live-data");
-        URL url = new URL("http://localhost/live-data");
+        URL url = new URL("https://server.uitprojects.com/live-data");
+       // URL url = new URL("http://localhost/live-data");
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
@@ -24,6 +24,7 @@ public class Main {
         byte[] time_bytes = new byte[4];
         float temperature_float;
         float humidity_float;
+        int time_int;
         while (true) {
             try {
                 reader.read(temperature_bytes, 0, 4);
@@ -38,7 +39,7 @@ public class Main {
             }
             temperature_float = ByteBuffer.wrap(temperature_bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
             humidity_float = ByteBuffer.wrap(humidity_bytes).order(ByteOrder.LITTLE_ENDIAN).getFloat();
-            int time_int = ByteBuffer.wrap(time_bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
+            time_int = ByteBuffer.wrap(time_bytes).order(ByteOrder.LITTLE_ENDIAN).getInt();
             System.out.printf("Temperature: %s, Humidity: %s, Time: %s%n",temperature_float,humidity_float,time_int);
 
 
