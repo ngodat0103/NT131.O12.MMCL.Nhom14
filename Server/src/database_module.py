@@ -12,7 +12,7 @@ SSL_CERT = os.getenv("ssl_client_cert")
 SSL_key = os.getenv("ssl_client_key")
 from threading import Lock
 
-lock = Lock()
+mysql_Lock = Lock()
 mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
                                            host=HOST,
                                            database='mobile_project',
@@ -22,7 +22,7 @@ mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
 
 
 def access_database(statement: str, param_any=None):
-    with lock:
+    with mysql_Lock:
         execute_command_interpreter = mysql_connection.cursor()
         execute_command_interpreter.execute(statement, param_any)
         response_tuple = execute_command_interpreter.fetchall()

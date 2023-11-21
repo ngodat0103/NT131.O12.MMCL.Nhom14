@@ -5,16 +5,15 @@ import numpy
 from fastapi import FastAPI, Form, Request, HTTPException, Response
 from starlette.responses import StreamingResponse, FileResponse
 from handle_types_message_client_module import *
-from database_module import lock
 import tempfile
-
+from threading import Lock
 MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
 TEMP_PATH = os.getcwd() + "/tmp/"
 app = FastAPI()
 
 import csv
-
+file_Lock = Lock()
 
 @app.get('/live-data')
 async def message_stream(request: Request):
@@ -55,7 +54,7 @@ async def get_image(refresh_token: str):
         return {
             "error": "account didn't have image or invalid token"
         }
-    with lock:
+    with file_Lock:
         with open(TEMP_PATH + "tmp.png", mode="wb") as temp_file:
             temp_file.write(image_bytes)
         return FileResponse(temp_file.name, media_type="image/png", filename="userprofile.png")
@@ -95,7 +94,7 @@ async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc
 @app.get("/history/download")
 async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc", limit: int = 1000):
     if order == "desc" or order == "asc":
-        with lock:
+        with file_Lock:
             with open(TEMP_PATH + "temp.csv", mode="w", newline='') as temp_csv:
                 writer = csv.writer(temp_csv)
                 writer.writerow(("Temperature", "Humidity", "Time"))
