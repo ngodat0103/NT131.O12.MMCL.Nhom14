@@ -170,7 +170,7 @@ def current():
     }
 
 
-def history(left, right, order, limit):
+def history(left, right, order, limit, download=False):
     if limit == 0:
         response = database_module.access_database(general_statements["history"].format(limit="", order=order),
                                                    (left, right))
@@ -178,6 +178,8 @@ def history(left, right, order, limit):
         response = database_module.access_database(
             general_statements["history"].format(limit=f"limit {limit}", order=order), (left, right))
 
+    if download is True:
+        return response
     body = {
         "type": "history",
         "from": left,

@@ -10,8 +10,10 @@ import tempfile
 
 MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
-TEMP_PATH = os.getcwd()+"/tmp/"
+TEMP_PATH = os.getcwd() + "/tmp/"
 app = FastAPI()
+
+import csv
 
 
 @app.get('/live-data')
@@ -54,7 +56,7 @@ async def get_image(refresh_token: str):
             "error": "account didn't have image or invalid token"
         }
 
-    with open(TEMP_PATH+"image_tmp.png",mode="wb") as temp_file:
+    with open(TEMP_PATH + "tmp.png", mode="wb") as temp_file:
         temp_file.write(image_bytes)
     return FileResponse(temp_file.name, media_type="image/png", filename="userprofile.png")
 
@@ -86,6 +88,18 @@ async def get_current_temp():
 async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc", limit: int = 1000):
     if order == "desc" or order == "asc":
         return history(left, right, order, limit)
+    else:
+        raise HTTPException(status_code=400, detail="order is invalid")
+
+
+@app.get("/history/download")
+async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc", limit: int = 1000):
+    if order == "desc" or order == "asc":
+        with open(TEMP_PATH + "temp.csv", mode="w", newline='') as temp_csv:
+            writer = csv.writer(temp_csv)
+            writer.writerow(("Temperature", "Humidity", "Time"))
+            writer.writerows(history(left, right, order, limit, True))
+        return FileResponse(TEMP_PATH + "temp.csv", filename="history data.csv", media_type="text/csv")
     else:
         raise HTTPException(status_code=400, detail="order is invalid")
 
