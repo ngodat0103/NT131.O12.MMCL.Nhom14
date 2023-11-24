@@ -9,6 +9,7 @@ import binascii
 server = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
 server.bind(("0.0.0.0", 80))
 server.listen(5)
+is_make_change = True
 
 
 def receive(length: int) -> bytes:
@@ -41,11 +42,13 @@ while True:
 
             temp_str = str(temp_float[0])
             humidity_str = str(humidity_float[0])
-            is_make_change = False
-            client_socket.send(is_make_change.to_bytes(length=1,byteorder="little"))
-       #     client_socket.send(int(5000).to_bytes(length=2, byteorder="little", signed=False))
-            # is_ack_bytes = receive(1)
-            # is_ack_bool = bool.from_bytes(is_ack_bytes, byteorder="little")
+            client_socket.send(is_make_change.to_bytes(length=1, byteorder="little"))
+            if is_make_change:
+                client_socket.send(int(5000).to_bytes(length=2, byteorder="little", signed=False))
+                status_code_bytes = receive(2)
+                status_code_int = int.from_bytes(status_code_bytes, byteorder="little")
+                print("Status code:" + str(status_code_int))
+                is_make_change = False
             headers = {
                 "Content-type": "application/json"
             }

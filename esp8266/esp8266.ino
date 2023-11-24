@@ -84,15 +84,22 @@ void loop() {
     client.readBytes(buffer,1);
 
     bool is_make_changes = *((bool*) buffer);
-
+    Serial.println(is_make_changes);
 
     if(is_make_changes){
-      unsigned char *buffer = new uint8[4];
-      client.readBytes(buffer,2);
-      int new_time_delay = *((int*) buffer);
+      unsigned char *buffer2 = new byte[4];
+      client.readBytes(buffer2,2);
+      int new_time_delay = *((int*) buffer2);
+      
+      int status_code = 200;
+
+      unsigned char *status_pointer = (uint8*) &status_code;
+      client.write(status_pointer,2);
+      
       Serial.println("new time delay: ");
       time_delay = new_time_delay;
       Serial.print(new_time_delay);
+
     }
 
   delay(time_delay);
