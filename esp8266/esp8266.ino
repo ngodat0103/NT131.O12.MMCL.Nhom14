@@ -13,9 +13,10 @@ DHTesp dht;
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
-
-const char* host = "192.168.1.120";
+int time_delay = 1000;
+const char* host = "192.168.1.16";
 const uint16_t port = 80;
+WiFiClient client;
 
 void setup() {
   Serial.begin(115200);
@@ -37,36 +38,39 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-  WiFiClient client;
   Serial.begin(115200);
+  bool connect_failed = false;
   dht.setup(D2, DHTesp::DHT22);
+   if (!client.connect(host, port)) {
+    Serial.println("connection failed");
+    connect_failed=true;
+    return;
+  }
+  client.isKeepAliveEnabled();
 
 }
 
 void loop() {
+  if (!client.connected()){
+    client.connect(host,port);
+    Serial.println("Lost connection, try reconnect ");
+    delay(300);
+    return;
+  }
   float temp = dht.getTemperature();
   float humidity = dht.getHumidity();
-
-  Serial.print("humidity: ");
+  Serial.print("\nhumidity: ");
   Serial.println(humidity);
   Serial.print("temperature: ");
   Serial.println(temp);
-  Serial.print("}\n");
-
+  Serial.print("\n");
 
   byte* bytePointer = (byte*) &temp;
-  WiFiClient client;
 
-  if (!client.connect(host, port)) {
-    Serial.println("connection failed");
-    delay(5000);  
-    return;
-  }
   for (int i = 0; i <=3; i++) {
     client.write(bytePointer[i]);
   }
@@ -74,11 +78,24 @@ void loop() {
   for(int i = 0 ; i<=3;i++){
     client.write(bytePointer[i]);
   }
-  Serial.println("Connection Ok");
-  
-  client.flush();
-  client.stop();
-  delay(1000);
+
+    unsigned char *buffer = new uint8[1];
+
+    client.readBytes(buffer,1);
+
+    bool is_make_changes = *((bool*) buffer);
+
+
+    if(is_make_changes){
+      unsigned char *buffer = new uint8[4];
+      client.readBytes(buffer,2);
+      int new_time_delay = *((int*) buffer);
+      Serial.println("new time delay: ");
+      time_delay = new_time_delay;
+      Serial.print(new_time_delay);
+    }
+
+  delay(time_delay);
 }
 
 
