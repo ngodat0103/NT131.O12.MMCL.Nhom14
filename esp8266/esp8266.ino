@@ -13,9 +13,10 @@ DHTesp dht;
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
-
-const char* host = "192.168.1.120";
+int time_delay = 1000;
+const char* host = "192.168.1.206";
 const uint16_t port = 80;
+WiFiClient client;
 
 void setup() {
   Serial.begin(115200);
@@ -37,36 +38,44 @@ void setup() {
     delay(500);
     Serial.print(".");
   }
-
   Serial.println("");
   Serial.println("WiFi connected");
   Serial.println("IP address: ");
   Serial.println(WiFi.localIP());
-  WiFiClient client;
   Serial.begin(115200);
+  bool connect_failed = false;
   dht.setup(D2, DHTesp::DHT22);
+   if (!client.connect(host, port)) {
+    Serial.println("connection failed");
+    connect_failed=true;
+    return;
+  }
+  client.isKeepAliveEnabled();
+  client.setTimeout(10000);
+  Serial.print("Set time out: ");
+  Serial.println(client.getTimeout());
+
 
 }
 
 void loop() {
-  float temp = dht.getTemperature();
-  float humidity = dht.getHumidity();
-
-  Serial.print("humidity: ");
-  Serial.println(humidity);
-  Serial.print("temperature: ");
-  Serial.println(temp);
-  Serial.print("}\n");
-
-
-  byte* bytePointer = (byte*) &temp;
-  WiFiClient client;
-
-  if (!client.connect(host, port)) {
-    Serial.println("connection failed");
-    delay(5000);  
+  if (!client.connected()){
+    Serial.println("Lost connection, try reconnect ");
+    client.connect(host,port);
+    time_delay = 1000;
+    delay(5000);
     return;
   }
+  float temp = dht.getTemperature();
+  float humidity = dht.getHumidity();
+  // Serial.print("\nhumidity: ");
+  // Serial.println(humidity);
+  // Serial.print("temperature: ");
+  // Serial.println(temp);
+  // Serial.print("\n");
+
+  byte* bytePointer = (byte*) &temp;
+
   for (int i = 0; i <=3; i++) {
     client.write(bytePointer[i]);
   }
@@ -74,11 +83,31 @@ void loop() {
   for(int i = 0 ; i<=3;i++){
     client.write(bytePointer[i]);
   }
-  Serial.println("Connection Ok");
-  
+
+    unsigned char *buffer = new uint8[1];
+
+    client.readBytes(buffer,1);
+
+    bool is_make_changes = *((bool*) buffer);
+
+    if(is_make_changes){
+      unsigned char *buffer2 = new byte[4];
+      client.readBytes(buffer2,2);
+      int new_time_delay = *((int*) buffer2);
+      
+      int status_code = 200;
+
+      unsigned char *status_pointer = (uint8*) &status_code;
+      client.write(status_pointer,2);
+      
+      Serial.print("new time delay: ");
+      time_delay = new_time_delay;
+      Serial.println(new_time_delay);
+
+    }
+
+  delay(time_delay);
   client.flush();
-  client.stop();
-  delay(1000);
 }
 
 
