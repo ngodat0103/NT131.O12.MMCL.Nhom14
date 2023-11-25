@@ -72,7 +72,7 @@ def listen_from_slave():
                     "temperature": temp_str,
                 }
                 json_data = json.dumps(json_dict)
-                response1 = requests.post("http://192.168.1.204/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
+                response1 = requests.post("http://192.168.1.204:9090/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
                                           data=json_data,
                                           headers=headers)
 
