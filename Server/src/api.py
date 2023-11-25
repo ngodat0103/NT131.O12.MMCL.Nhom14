@@ -173,7 +173,7 @@ async def set_setting(response: Response,
                                                      (refresh_token,))
     if len(response_mysql) == 0:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return HTTPException(status_code=401, detail="invalid token").status_code
+        return HTTPException(status_code=401, detail="invalid token")
     is_admin_account = bool(response_mysql[0][0])
 
     if is_admin_account is False:

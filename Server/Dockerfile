@@ -12,5 +12,7 @@ ENV username_mysql=$username_mysql
 ENV symmetric_key=none
 WORKDIR /app/NT131.O12.MMCL.Nhom14/Server/src
 RUN pip install -r requirement.txt
+RUN mkdir tmp
 EXPOSE 80
-CMD ["python3","main.py"]
+EXPOSE 2509
+CMD ["python3","-u","main.py"]
