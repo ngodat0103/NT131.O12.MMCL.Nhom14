@@ -3,12 +3,8 @@ import threading
 import time
 
 import requests
-import socket
 import numpy
-import binascii
-from threading import Lock
-from threading import Thread
-from time import sleep
+
 from share import *
 
 is_make_change = False
@@ -76,7 +72,7 @@ def listen_from_slave():
                     "temperature": temp_str,
                 }
                 json_data = json.dumps(json_dict)
-                response1 = requests.post("http://thingsboard/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
+                response1 = requests.post("http://192.168.1.204/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
                                           data=json_data,
                                           headers=headers)
 
@@ -87,7 +83,7 @@ def listen_from_slave():
                     "temperature": temp_str,
                     "time_primary": int(time.time())
                 }
-                response2 = requests.post("http://servernhung/update_temp",
+                response2 = requests.post("http://192.168.1.205/update_temp",
                                           data=json_dict,
                                           headers=headers)
 
