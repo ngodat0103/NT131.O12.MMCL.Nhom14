@@ -7,5 +7,6 @@ RUN dos2unix NT131.O12.MMCL.Nhom14/Client/src/*
 ENV symmetric_key=symmetric_key
 WORKDIR /app/NT131.O12.MMCL.Nhom14/Client/src
 RUN pip install -r requirement.txt
-CMD ["python3","main.py"]
+EXPOSE 80
+CMD ["python3","-u","main.py"]
 
