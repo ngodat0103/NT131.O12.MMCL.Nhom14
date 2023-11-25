@@ -51,7 +51,7 @@ void setup() {
     return;
   }
   client.isKeepAliveEnabled();
-  client.setTimeout(120000);
+  client.setTimeout(10000);
   Serial.print("Set time out: ");
   Serial.println(client.getTimeout());
 
@@ -60,8 +60,9 @@ void setup() {
 
 void loop() {
   if (!client.connected()){
-    client.connect(host,port);
     Serial.println("Lost connection, try reconnect ");
+    client.connect(host,port);
+    time_delay = 1000;
     delay(5000);
     return;
   }
@@ -99,9 +100,9 @@ void loop() {
       unsigned char *status_pointer = (uint8*) &status_code;
       client.write(status_pointer,2);
       
-      Serial.println("new time delay: ");
+      Serial.print("new time delay: ");
       time_delay = new_time_delay;
-      Serial.print(new_time_delay);
+      Serial.println(new_time_delay);
 
     }
 

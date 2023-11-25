@@ -1,7 +1,7 @@
 from share import *
 from time import sleep
 from threading import Thread
-from slave import changes,is_device_alive
+from slave import changes, is_device_alive
 
 
 def listen_master(current_lock: Lock, func, func2):
@@ -27,7 +27,7 @@ def listen_master(current_lock: Lock, func, func2):
                 master_socket.send(True.to_bytes(length=1, byteorder="little", signed=False))
         try:
             command_code_bytes = receive(4, master_socket)
-        except :
+        except:
             print("Some thing is not right from master, try to reconnect in 3 seconds")
             sleep(3)
             master_socket = reconnect()

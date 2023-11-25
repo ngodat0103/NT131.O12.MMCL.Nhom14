@@ -33,6 +33,8 @@ def listen_from_slave():
 
     while True:
         slave_socket, ip_address = manager_socket.accept()
+        slave_socket.settimeout(120)
+
         with lock:
             device_alive = True
 
@@ -44,8 +46,6 @@ def listen_from_slave():
                 status_code_int = int.from_bytes(status_code_bytes, byteorder="little")
                 print("Status code:" + str(status_code_int))
                 is_make_change = False
-
-        slave_socket.settimeout(120)
         while True:
             try:
                 temp_bytes = receive(4, slave_socket)
