@@ -14,7 +14,7 @@ def listen_master(current_lock: Lock, func, func2):
         master_socket.close()
         new_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
         new_socket.settimeout(120)
-        new_socket.connect(("192.168.1.16", 2509))
+        new_socket.connect(("servernhung", 2509))
         return new_socket
 
     while True:
