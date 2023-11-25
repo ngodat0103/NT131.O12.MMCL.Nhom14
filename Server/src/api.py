@@ -170,12 +170,15 @@ async def set_setting(response: Response,
                       refresh_token: Annotated[str, Form()],
                       device_name: Annotated[str, Form()] = "esp8266"):
     response_mysql = database_module.access_database(general_statements["authentication_token"],
-                                                       (refresh_token,))
+                                                     (refresh_token,))
+    if len(response_mysql) == 0:
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return HTTPException(status_code=401, detail="invalid token").status_code
     is_admin_account = bool(response_mysql[0][0])
 
     if is_admin_account is False:
-        response.status_code=status.HTTP_401_UNAUTHORIZED
-        return HTTPException(status_code=401,detail="invalid token")
+        response.status_code = status.HTTP_401_UNAUTHORIZED
+        return HTTPException(status_code=401, detail="invalid token")
     if len(database_module.access_database(general_statements["get_device_info"], (device_name,))) == 0:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         return HTTPException(status_code=422, detail="device not found")

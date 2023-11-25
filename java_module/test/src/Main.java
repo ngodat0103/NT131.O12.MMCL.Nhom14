@@ -15,7 +15,7 @@ public class Main {
 
         HttpURLConnection con = (HttpURLConnection) url.openConnection();
         con.setRequestMethod("GET");
-        con.setReadTimeout(30000);
+        con.setReadTimeout(120000);
         int status = con.getResponseCode();
         System.out.println(status);
         InputStream reader = con.getInputStream();
