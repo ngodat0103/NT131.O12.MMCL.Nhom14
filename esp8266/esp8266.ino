@@ -14,7 +14,7 @@ DHTesp dht;
 const char* ssid = STASSID;
 const char* password = STAPSK;
 int time_delay = 1000;
-const char* host = "192.168.1.16";
+const char* host = "192.168.1.206";
 const uint16_t port = 80;
 WiFiClient client;
 
@@ -51,6 +51,10 @@ void setup() {
     return;
   }
   client.isKeepAliveEnabled();
+  client.setTimeout(120000);
+  Serial.print("Set time out: ");
+  Serial.println(client.getTimeout());
+
 
 }
 
@@ -58,16 +62,16 @@ void loop() {
   if (!client.connected()){
     client.connect(host,port);
     Serial.println("Lost connection, try reconnect ");
-    delay(300);
+    delay(5000);
     return;
   }
   float temp = dht.getTemperature();
   float humidity = dht.getHumidity();
-  Serial.print("\nhumidity: ");
-  Serial.println(humidity);
-  Serial.print("temperature: ");
-  Serial.println(temp);
-  Serial.print("\n");
+  // Serial.print("\nhumidity: ");
+  // Serial.println(humidity);
+  // Serial.print("temperature: ");
+  // Serial.println(temp);
+  // Serial.print("\n");
 
   byte* bytePointer = (byte*) &temp;
 
@@ -84,7 +88,6 @@ void loop() {
     client.readBytes(buffer,1);
 
     bool is_make_changes = *((bool*) buffer);
-    Serial.println(is_make_changes);
 
     if(is_make_changes){
       unsigned char *buffer2 = new byte[4];
@@ -103,6 +106,7 @@ void loop() {
     }
 
   delay(time_delay);
+  client.flush();
 }
 
 

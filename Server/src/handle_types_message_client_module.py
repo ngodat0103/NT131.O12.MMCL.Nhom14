@@ -1,12 +1,13 @@
 import base64
+
 import mysql.connector.errors
 import pandas
 from random_otp.generator import generate_numeric_otp
 import cipher_module
+from cipher_module import hash_password
 import smtp
 from database_statements_module import general_statements
 import database_module
-from cipher_module import hash_password
 from sqlalchemy import create_engine
 from time import time
 import datetime
@@ -14,13 +15,13 @@ import pandas as pd
 
 
 def authentication_credential(username_primary: str, password: str, device_name: str, refresh_token: str) -> dict[
-    str, str]:
+                                                                                                                 str, str] | None:
     if refresh_token == "None":
         response = database_module.access_database(
             general_statements["authentication_credential"], (username_primary, hash_password(password))
         )
         if len(response) == 0:
-            return {"type": "login", "status": "failed", "reason": "username or password invalid"}
+            return None
         else:
             refresh_token_str = cipher_module.generate_random_token(32)
             uuid_str = cipher_module.generate_random_token(10)
@@ -34,11 +35,10 @@ def authentication_credential(username_primary: str, password: str, device_name:
             return {"type": "login",
                     "status": "success",
                     "refresh_token": refresh_token_str,
-                    "image_profile": base64.b64encode(response[0][3]).decode() if response[0][3] is not None else "None"
                     }
 
 
-def create_account(username_primary: str, password: str, email: str) -> dict[str, str]:
+def create_account(username_primary: str, password: str, email: str) -> bool:
     try:
         database_module.access_database(general_statements["create_account"],
                                         (
@@ -48,9 +48,8 @@ def create_account(username_primary: str, password: str, email: str) -> dict[str
                                         )
                                         )
     except mysql.connector.errors.IntegrityError as error:
-        print(str(error))
-        return {"status": "can't create account", "reason": str(error)}
-    return {"status": "successful"}
+        return False
+    return True
 
 
 def forgot_password(argument: dict = None, check_otp=False):
@@ -145,7 +144,7 @@ def get_weather_data(argument: dict):
     return {"type": "get_weather", "status": "success", "weather_data": weather_data_firstrow_dataframe.to_json()}
 
 
-def update_temp(time_primary: int, temperature: float, humidity: float):
+def update_temp(time_primary: int, temperature: float, humidity: float) -> bool:
     time_readable_str = datetime.datetime.fromtimestamp(time_primary).strftime("%d-%m-%Y: %H:%M:%S ")
     try:
         database_module.access_database(general_statements["update_temp"], (
@@ -156,8 +155,8 @@ def update_temp(time_primary: int, temperature: float, humidity: float):
         )
                                         )
     except mysql.connector.errors.IntegrityError:
-        return {"type": "update_temp", "status": "can't update", "reason": "duplicate primary key"}
-    return {"type": "update_temp", "status": "Ok"}
+        return False
+    return True
 
 
 def current():
@@ -198,6 +197,14 @@ def history(left, right, order, limit, download=False):
     body["length elements"] = len(response)
 
     return body
+
+
+def device_setting(device_name: str):
+    response = database_module.access_database(general_statements["get_device_info"], (device_name,))
+    return {
+        "device_name": device_name,
+        "delay_time": str(response[0][1]) + "ms"
+    }
 
 
 def change_password(argument: dict):
