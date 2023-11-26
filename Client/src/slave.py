@@ -51,6 +51,7 @@ def listen_from_slave():
                 temp_bytes = receive(4, slave_socket)
                 if temp_bytes == b"":
                     slave_socket.shutdown(socket.SHUT_RDWR)
+                    device_alive = False
                     slave_socket.close()
                     break
 
@@ -95,6 +96,7 @@ def listen_from_slave():
                 slave_socket.shutdown(socket.SHUT_RDWR)
                 slave_socket.close()
                 print("close connection because timeout")
+                device_alive = False
                 break
 
 

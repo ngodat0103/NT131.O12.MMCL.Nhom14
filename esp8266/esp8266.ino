@@ -63,7 +63,6 @@ void loop() {
     Serial.println("Lost connection, try reconnect ");
     client.connect(host,port);
     time_delay = 1000;
-    delay(5000);
     return;
   }
   float temp = dht.getTemperature();
