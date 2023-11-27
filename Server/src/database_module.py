@@ -13,20 +13,23 @@ SSL_key = os.getenv("ssl_client_key")
 from threading import Lock
 
 mysql_Lock = Lock()
-mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
-                                           host=HOST,
-                                           database='mobile_project',
-                                           ssl_cert=SSL_CERT,
 
-                                           ssl_key=SSL_key, )
 
 
 def access_database(statement: str, param_any=None):
     with mysql_Lock:
+        mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
+                                                   host=HOST,
+                                                   database='mobile_project',
+                                                   ssl_cert=SSL_CERT,
+
+                                                   ssl_key=SSL_key, )
         execute_command_interpreter = mysql_connection.cursor()
         execute_command_interpreter.execute(statement, param_any)
         response_tuple = execute_command_interpreter.fetchall()
         mysql_connection.commit()
+        mysql_connection.disconnect()
+        mysql_connection.close()
     return response_tuple
 
 
