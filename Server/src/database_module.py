@@ -13,41 +13,21 @@ SSL_key = os.getenv("ssl_client_key")
 from threading import Lock
 
 mysql_Lock = Lock()
+mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
+                                           host=HOST,
+                                           database='mobile_project',
+                                           ssl_cert=SSL_CERT,
 
+                                           ssl_key=SSL_key, )
 
 
 def access_database(statement: str, param_any=None):
     with mysql_Lock:
-        mysql_connection = mysql.connector.connect(user=USERNAME, password=PASSWORD,
-                                                   host=HOST,
-                                                   database='mobile_project',
-                                                   ssl_cert=SSL_CERT,
-
-                                                   ssl_key=SSL_key, )
+        while not mysql_connection.is_connected():
+            print("Lost connection to mysql, reconnect in 3 seconds")
+            mysql_connection.reconnect(delay=3)
         execute_command_interpreter = mysql_connection.cursor()
         execute_command_interpreter.execute(statement, param_any)
         response_tuple = execute_command_interpreter.fetchall()
         mysql_connection.commit()
-        mysql_connection.disconnect()
-        mysql_connection.close()
     return response_tuple
-
-
-def test():
-    response = access_database("select time_primary,temperature,humidity from mobile_project.raspberry")
-    body = {
-        "type": "history",
-        "from": 123,
-        "to": 1234,
-        "data": []
-    }
-    for current in response:
-        body["data"].append({
-            "time": current[2],
-            "temperature": current[0],
-            "humidity": current[1]
-        })
-
-    body_str = json.dumps(body)
-    return body_str
-

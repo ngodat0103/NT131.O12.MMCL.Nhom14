@@ -151,6 +151,8 @@ async def registration(response: Response,
     return HTTPException(detail="username existed", status_code=422)
 
 
+
+
 @app.post("/update_temp")
 async def temp_update(response: Response, time_primary: Annotated[int, Form()],
                       temperature: Annotated[float, Form()],
