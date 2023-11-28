@@ -1,4 +1,5 @@
 import base64
+import threading
 
 import mysql.connector.errors
 import pandas
@@ -12,13 +13,14 @@ from sqlalchemy import create_engine
 from time import time
 import datetime
 import pandas as pd
+from smtp import send_email_warning
 
 
-def authentication_credential(username_primary: str, password: str, device_name: str, refresh_token: str) -> dict[
-                                                                                                                 str, str] | None:
+def authentication_credential(username: str, password: str, device_name: str, refresh_token: str) -> dict[
+                                                                                                         str, str] | None:
     if refresh_token == "None":
         response = database_module.access_database(
-            general_statements["authentication_credential"], (username_primary, hash_password(password))
+            general_statements["authentication_credential"], (username, hash_password(password))
         )
         if len(response) == 0:
             return None
@@ -28,7 +30,7 @@ def authentication_credential(username_primary: str, password: str, device_name:
             database_module.access_database(general_statements["update_token"], (
                 uuid_str,
                 device_name,
-                username_primary,
+                username,
                 refresh_token_str
             )
                                             )
@@ -38,17 +40,19 @@ def authentication_credential(username_primary: str, password: str, device_name:
                     }
 
 
-def create_account(username_primary: str, password: str, email: str) -> bool:
+def create_account(username: str, password: str, email: str) -> bool:
     try:
         database_module.access_database(general_statements["create_account"],
                                         (
-                                            username_primary,
+                                            username,
                                             hash_password(password),
                                             email
                                         )
                                         )
     except mysql.connector.errors.IntegrityError as error:
         return False
+
+    database_module.access_database("insert into account_setting(`username`) values(%s)", (username,))
     return True
 
 
@@ -156,6 +160,14 @@ def update_temp(time_primary: int, temperature: float, humidity: float) -> bool:
                                         )
     except mysql.connector.errors.IntegrityError:
         return False
+
+    response = database_module.access_database(general_statements["check_limit"], (temperature,))
+    if len(response) == 1:
+        response = database_module.access_database(general_statements["get_emails"])
+        emails = [email[0] for email in response]
+        send_email_Thread = threading.Thread(target=send_email_warning, args=(emails, temperature, humidity))
+        send_email_Thread.start()
+
     return True
 
 
@@ -202,8 +214,10 @@ def history(left, right, order, limit, download=False):
 def device_setting(device_name: str):
     response = database_module.access_database(general_statements["get_device_info"], (device_name,))
     return {
-        "device_name": device_name,
-        "delay_time": str(response[0][1]) + "ms"
+        "Device_name": device_name,
+        "Delay time": str(response[0][1]) + "ms",
+        "Warning limit temperature": response[0][2],
+        "Warning limit humidity": response[0][3]
     }
 
 

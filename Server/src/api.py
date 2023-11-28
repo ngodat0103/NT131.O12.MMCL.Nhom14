@@ -117,7 +117,7 @@ async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc
 
 
 @app.get("/device/setting")
-async def get_setting(response: Response, device_name: str = "esp8266"):
+async def get_device_setting(response: Response, device_name: str = "esp8266"):
     if len(database_module.access_database(general_statements["get_device_info"], (device_name,))) == 0:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         return HTTPException(status_code=422, detail="device not found")
@@ -125,12 +125,12 @@ async def get_setting(response: Response, device_name: str = "esp8266"):
 
 
 @app.post("/authentication")
-async def login(response: Response, username_primary: Annotated[str, Form()],
+async def login(response: Response, username: Annotated[str, Form()],
                 password: Annotated[str, Form()],
                 device_name: Annotated[str, Form()] = "test device",
                 refresh_token: Annotated[str, Form()] = "None",
                 ):
-    result = authentication_credential(username_primary, password, device_name, refresh_token)
+    result = authentication_credential(username, password, device_name, refresh_token)
     if type(result) == dict:
         return result
     response.status_code = status.HTTP_401_UNAUTHORIZED
@@ -139,18 +139,16 @@ async def login(response: Response, username_primary: Annotated[str, Form()],
 
 @app.post("/registration")
 async def registration(response: Response,
-                       username_primary: Annotated[str, Form()],
+                       username: Annotated[str, Form()],
                        password: Annotated[str, Form()],
                        email: Annotated[str, Form()]
                        ):
-    result = create_account(username_primary, password, email)
+    result = create_account(username, password, email)
     if result is True:
         response.status_code = status.HTTP_204_NO_CONTENT
         return
     response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
     return HTTPException(detail="username existed", status_code=422)
-
-
 
 
 @app.post("/update_temp")
@@ -170,6 +168,8 @@ async def temp_update(response: Response, time_primary: Annotated[int, Form()],
 async def set_setting(response: Response,
                       time_delay: Annotated[int, Form()],
                       refresh_token: Annotated[str, Form()],
+                      war_temp: Annotated[float, Form()],
+                      war_humidity: Annotated[float, Form()],
                       device_name: Annotated[str, Form()] = "esp8266"):
     response_mysql = database_module.access_database(general_statements["authentication_token"],
                                                      (refresh_token,))
@@ -180,7 +180,7 @@ async def set_setting(response: Response,
 
     if is_admin_account is False:
         response.status_code = status.HTTP_401_UNAUTHORIZED
-        return HTTPException(status_code=401, detail="invalid token")
+        return HTTPException(status_code=401, detail="Permission deny")
     if len(database_module.access_database(general_statements["get_device_info"], (device_name,))) == 0:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         return HTTPException(status_code=422, detail="device not found")
@@ -191,6 +191,5 @@ async def set_setting(response: Response,
         device = device_name
         iot_delay = time_delay
     response.status_code = status.HTTP_204_NO_CONTENT
-    database_module.access_database(general_statements["update_delay_iot"], (time_delay, device_name))
-
+    database_module.access_database(general_statements["update_setting_device"], (time_delay,war_temp,war_humidity, device_name))
     return
