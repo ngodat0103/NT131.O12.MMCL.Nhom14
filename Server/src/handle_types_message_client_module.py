@@ -149,11 +149,9 @@ def get_weather_data(argument: dict):
 
 
 def update_temp(time_primary: int, temperature: float, humidity: float) -> bool:
-    time_readable_str = datetime.datetime.fromtimestamp(time_primary).strftime("%d-%m-%Y: %H:%M:%S ")
     try:
         database_module.access_database(general_statements["update_temp"], (
             time_primary,
-            time_readable_str,
             temperature,
             humidity
         )
@@ -172,13 +170,32 @@ def update_temp(time_primary: int, temperature: float, humidity: float) -> bool:
 
 
 def current():
-    response_from_mysql = database_module.access_database(general_statements["get_temp"])
-    return {
+    response_mysql = database_module.access_database(general_statements["get_temp"])
+    current_day_left: float = datetime.datetime.fromtimestamp(float(response_mysql[0][2])).replace(hour=0, minute=0,
+                                                                                                   second=1).timestamp()
+    current_day_left = int(current_day_left)
+    current_day_right = response_mysql[0][2]
+
+    temperature_mysql = general_statements["get_min_max"].format(type="temperature")
+    humidity_mysql = general_statements["get_min_max"].format(type="humidity")
+    temperature = database_module.access_database(temperature_mysql, (current_day_left, current_day_right))
+    humidity = database_module.access_database(humidity_mysql, (current_day_left, current_day_right))
+
+    response = {
         "type": "current time",
-        "time": response_from_mysql[0][2],
-        "temperature": response_from_mysql[0][0],
-        "humidity": response_from_mysql[0][1]
+        "time": response_mysql[0][2],
+        "temperature": {
+            "current": response_mysql[0][0],
+            "min": temperature[len(temperature) - 1][0] if len(temperature) > 0 else None,
+            "max": temperature[0][0] if len(temperature) > 0 else None
+        },
+        "humidity": {
+            "current": response_mysql[0][1],
+            "min": humidity[len(humidity) - 1][0] if len(humidity) > 0 else None,
+            "max": humidity[0][0] if len(humidity) > 0 else None
+        }
     }
+    return response
 
 
 def history(left, right, order, limit, download=False):
@@ -229,3 +246,8 @@ def change_password(argument: dict):
     except:
         return {"status": "Something is not right"}
     return {"status": "success", "type": "reset password"}
+
+
+def set_user_notification(notification: int, refresh_token: str):
+    response = database_module.access_database(general_statements["set_user_notification"],
+                                               (notification, refresh_token))

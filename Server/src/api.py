@@ -4,6 +4,8 @@ from typing import Union, Annotated
 import numpy
 from fastapi import FastAPI, Form, Request, HTTPException, Response, status
 from starlette.responses import StreamingResponse, FileResponse
+
+import database_module
 from handle_types_message_client_module import *
 from threading import Lock
 
@@ -124,7 +126,7 @@ async def get_device_setting(response: Response, device_name: str = "esp8266"):
     return device_setting(device_name)
 
 
-@app.post("/authentication")
+@app.post("/user/authentication")
 async def login(response: Response, username: Annotated[str, Form()],
                 password: Annotated[str, Form()],
                 device_name: Annotated[str, Form()] = "test device",
@@ -135,6 +137,34 @@ async def login(response: Response, username: Annotated[str, Form()],
         return result
     response.status_code = status.HTTP_401_UNAUTHORIZED
     return HTTPException(status_code=401, detail="invalid username or password")
+
+
+@app.get("/user/notification")
+async def user_setting(response: Response, refresh_token: str):
+    response_mysql = database_module.access_database(general_statements["user_notification"], (refresh_token,))
+    if len(response_mysql) == 0:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return HTTPException(status_code=422, detail="token invalid")
+    return {
+        "notification": True if response_mysql[0][0] == 1 else False
+    }
+
+
+@app.post("/user/set-notification")
+async def user_setting(response: Response,
+                       refresh_token: Annotated[str, Form()],
+                       notification: Annotated[bool, Form()]
+                       ):
+    response_mysql = database_module.access_database(general_statements["authentication_token"], (refresh_token,))
+    if len(response_mysql) == 0:
+        response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
+        return HTTPException(status_code=422, detail="invalid token")
+    notification_int = int(notification)
+
+    response_mysql = database_module.access_database(general_statements["set_user_notification"],
+                                                     (notification_int, refresh_token))
+    response.status_code = status.HTTP_204_NO_CONTENT
+    return None
 
 
 @app.post("/registration")
@@ -191,5 +221,6 @@ async def set_setting(response: Response,
         device = device_name
         iot_delay = time_delay
     response.status_code = status.HTTP_204_NO_CONTENT
-    database_module.access_database(general_statements["update_setting_device"], (time_delay,war_temp,war_humidity, device_name))
+    database_module.access_database(general_statements["update_setting_device"],
+                                    (time_delay, war_temp, war_humidity, device_name))
     return
