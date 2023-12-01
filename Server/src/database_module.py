@@ -5,8 +5,8 @@ import os
 
 USERNAME = os.getenv("username_mysql")
 PASSWORD = os.getenv("password_mysql")
-#HOST = "app.mariadb.uitprojects.com"
-HOST = "maria_db"
+HOST = "app.mariadb.uitprojects.com"
+#HOST = "maria_db"
 
 PORT = 3306
 DATABASE = "mobile_project"
@@ -58,7 +58,7 @@ general_statements: dict[str, str] = {
     'get_temp': "select temperature,humidity,time_primary from mobile_project.raspberry order by time_primary desc "
                 "limit 1",
     "history": "select temperature,humidity,time_primary from mobile_project.raspberry where time_primary>%s and "
-               "time_primary <%s"
+               "time_primary <%s "
                "order by time_primary {order} {limit} ",
     'create_account': "insert into mobile_project.account(`username`,`password`,`email`) values(%s,%s,"
                       "%s)",
