@@ -1,7 +1,5 @@
-/*
-    This sketch establishes a TCP connection to a "quote of the day" service.
-    It sends a "hello" message, and then prints received data.
-*/
+void(* resetFunc) (void) = 0;
+
 
 #include <ESP8266WiFi.h>
 #include "DHTesp.h"
@@ -94,7 +92,9 @@ void loop() {
       unsigned char *buffer2 = new byte[4];
       client.readBytes(buffer2,2);
       int new_time_delay = *((int*) buffer2);
-      
+      if (new_time_delay = 0 || new_time_delay>99999999){
+        resetFunc();
+      }
       int status_code = 200;
 
       unsigned char *status_pointer = (uint8*) &status_code;
