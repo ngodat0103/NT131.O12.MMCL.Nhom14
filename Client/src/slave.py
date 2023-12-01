@@ -1,6 +1,7 @@
 import json
 import threading
 import time
+from datetime import datetime
 
 import requests
 import numpy
@@ -9,10 +10,18 @@ from share import *
 
 is_make_change = False
 device_alive = False
-manager_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-manager_socket.bind(("0.0.0.0", 80))
-manager_socket.listen(5)
+ras_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
+ras_socket.bind(("0.0.0.0", 80))
+ras_socket.listen(5)
 delay = 1000
+import pytz
+
+tz = pytz.timezone('Asia/Ho_Chi_Minh')
+berlin_now = datetime.now(tz)
+
+
+def vn_time() -> float:
+    return datetime.now(tz).timestamp()
 
 
 def is_device_alive():
@@ -32,7 +41,7 @@ def listen_from_slave():
     print("Server is listening from Arduino")
 
     while True:
-        slave_socket, ip_address = manager_socket.accept()
+        slave_socket, ip_address = ras_socket.accept()
         slave_socket.settimeout(120)
 
         with lock:
@@ -46,6 +55,7 @@ def listen_from_slave():
                 status_code_int = int.from_bytes(status_code_bytes, byteorder="little")
                 print("Status code:" + str(status_code_int))
                 is_make_change = False
+
         while True:
             try:
                 temp_bytes = receive(4, slave_socket)
@@ -66,30 +76,24 @@ def listen_from_slave():
                     make_changes(delay)
 
                 headers = {
-                    "Content-type": "application/json"
+                    "Content-type": "application/x-www-form-urlencoded"
                 }
-                json_dict = {
-                    "humidity": humidity_str,
-                    "temperature": temp_str,
-                }
-                json_data = json.dumps(json_dict)
-                response1 = requests.post("http://192.168.1.204:9090/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
-                                          data=json_data,
-                                          headers=headers)
-
-                headers["Content-type"] = "application/x-www-form-urlencoded"
 
                 json_dict = {
                     "humidity": humidity_str,
                     "temperature": temp_str,
-                    "time_primary": int(time.time())
+                    "time_primary": int(vn_time())
                 }
-                response2 = requests.post("http://192.168.1.205/update_temp",
-                                          data=json_dict,
-                                          headers=headers)
+                print(datetime.now(tz).strftime("%d/%m/%Y, %H:%M:%S"))
+                try:
+                    response = requests.post("http://servernhung/update_temp",
+                                             data=json_dict,
+                                             headers=headers,timeout=3)
+                except requests.exceptions.ConnectionError:
+                    print("The server is down")
 
-                print(humidity_str)
-                print(temp_str)
+                print("Temperature: " + temp_str)
+                print("Humidity: " + humidity_str + "\n")
 
 
             except socket.timeout:

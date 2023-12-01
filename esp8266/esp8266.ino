@@ -14,7 +14,7 @@ DHTesp dht;
 const char* ssid = STASSID;
 const char* password = STAPSK;
 int time_delay = 1000;
-const char* host = "192.168.1.206";
+const char* host = "192.168.1.9";
 const uint16_t port = 80;
 WiFiClient client;
 
@@ -62,6 +62,7 @@ void loop() {
   if (!client.connected()){
     Serial.println("Lost connection, try reconnect ");
     client.connect(host,port);
+    delay(5000);
     time_delay = 1000;
     return;
   }

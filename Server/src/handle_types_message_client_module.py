@@ -1,19 +1,43 @@
 import base64
+import json
 import threading
 
 import mysql.connector.errors
 import pandas
+import requests
 from random_otp.generator import generate_numeric_otp
 import cipher_module
 from cipher_module import hash_password
 import smtp
-from database_statements_module import general_statements
+from database_module import general_statements
 import database_module
 from sqlalchemy import create_engine
 from time import time
 import datetime
 import pandas as pd
 from smtp import send_email_warning
+from threading import Lock
+
+
+def to_thingsboard(temp: float, humidity: float):
+    headers = {
+        "Content-type": "application/json"
+    }
+    json_dict = {
+        "humidity": humidity,
+        "temperature": temp,
+    }
+    try:
+        json_data = json.dumps(json_dict)
+        response1 = requests.post("http://thingsboard:9090/api/v1/xNX9FiLyWenmKNaj2pXV/telemetry",
+                                  data=json_data,
+                                  headers=headers, timeout=1)
+    except requests.exceptions.ConnectionError:
+
+        print("thingsboard is not available")
+        return
+    if response1.status_code > 400:
+        print(response1.json())
 
 
 def authentication_credential(username: str, password: str, device_name: str, refresh_token: str) -> dict[
@@ -158,13 +182,14 @@ def update_temp(time_primary: int, temperature: float, humidity: float) -> bool:
                                         )
     except mysql.connector.errors.IntegrityError:
         return False
+    to_thingsboard(temperature, humidity)
 
     response = database_module.access_database(general_statements["check_limit"], (temperature,))
     if len(response) == 1:
         response = database_module.access_database(general_statements["get_emails"])
         emails = [email[0] for email in response]
-        send_email_Thread = threading.Thread(target=send_email_warning, args=(emails, temperature, humidity))
-        send_email_Thread.start()
+        send_email_thread = threading.Thread(target=send_email_warning, args=(emails, temperature, humidity))
+        send_email_thread.start()
 
     return True
 

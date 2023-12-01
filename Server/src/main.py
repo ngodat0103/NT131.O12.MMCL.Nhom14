@@ -27,7 +27,7 @@ def listen_on(current_socket: socket.socket, func1, func2, func3, func4):
     while True:
         manager_socket, address = current_socket.accept()
         api.command_code_iot = 200
-        api.iot_delay = database_module.access_database(general_statements["get_device_info"],("esp8266",))[0][1]
+        api.iot_delay = database_module.access_database(general_statements["get_device_info"], ("esp8266",))[0][1]
         print("new slave connection from " + address[0])
         manager_socket.settimeout(30)
         while True:
@@ -62,4 +62,4 @@ server_socket_thread = Thread(target=listen_on, args=(
 server_socket_thread.start()
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=80,proxy_headers=True)
+    uvicorn.run(app, host="0.0.0.0", port=80, proxy_headers=True)

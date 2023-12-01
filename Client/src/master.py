@@ -7,6 +7,7 @@ from slave import changes, is_device_alive
 def listen_master(current_lock: Lock, func, func2):
     master_socket = socket.socket(socket.AF_INET, type=socket.SOCK_STREAM)
     master_socket.connect(("servernhung", 2509))
+
     master_socket.settimeout(120)
 
     def reconnect() -> socket.socket:
@@ -18,15 +19,15 @@ def listen_master(current_lock: Lock, func, func2):
         return new_socket
 
     while True:
-        with lock:
-            if func2() is False:
-                master_socket.send(False.to_bytes(length=1, byteorder="little", signed=False))
-                sleep(2)
-                continue
-            else:
-                master_socket.send(True.to_bytes(length=1, byteorder="little", signed=False))
         try:
-            command_code_bytes = receive(4, master_socket)
+            with lock:
+                if func2() is False:
+                    master_socket.send(False.to_bytes(length=1, byteorder="little", signed=False))
+                    sleep(2)
+                    continue
+                else:
+                    master_socket.send(True.to_bytes(length=1, byteorder="little", signed=False))
+                command_code_bytes = receive(4, master_socket)
         except:
             print("Some thing is not right from master, try to reconnect in 3 seconds")
             sleep(3)
