@@ -92,7 +92,7 @@ void loop() {
       unsigned char *buffer2 = new byte[4];
       client.readBytes(buffer2,2);
       int new_time_delay = *((int*) buffer2);
-      if (new_time_delay = 0 || new_time_delay>99999999){
+      if (new_time_delay == 0 || new_time_delay>99999999){
         resetFunc();
       }
       int status_code = 200;

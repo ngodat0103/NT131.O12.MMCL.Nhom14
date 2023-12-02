@@ -2,6 +2,9 @@ import socket
 from threading import Lock
 
 lock = Lock()
+is_make_change = False
+device_alive = False
+delay = 1000
 
 
 def receive(length: int, current_socket: socket.socket) -> bytes:
