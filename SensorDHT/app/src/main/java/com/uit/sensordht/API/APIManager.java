@@ -8,6 +8,7 @@ import com.uit.sensordht.Interface.CreateUserCallback;
 import com.uit.sensordht.Interface.CurrentWeatherCallback;
 import com.uit.sensordht.Interface.LoginUserCallback;
 import com.uit.sensordht.Model.GlobalVars;
+import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.User;
 import com.uit.sensordht.Model.Weather;
 
@@ -30,8 +31,10 @@ public class APIManager {
                 if(response.isSuccessful())
                 {
                     Weather data = response.body();
+                    ItemWeather temperature = data.temperature;
+                    ItemWeather humidity = data.humidity;
                     Log.d("API CALL", "Get current weather Success");
-                    callback.onSuccess(data);
+                    callback.onSuccess(data, temperature, humidity);
                 }
                 else {
                     try {
