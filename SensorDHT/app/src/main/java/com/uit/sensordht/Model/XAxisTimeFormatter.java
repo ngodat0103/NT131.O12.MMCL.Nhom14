@@ -10,9 +10,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public class XAxisTimeFormatter extends ValueFormatter {
-
-
-
     @Override
     public String getAxisLabel(float value, AxisBase axis) {
         long timestamp = GlobalVars.currentTime + (long)value;

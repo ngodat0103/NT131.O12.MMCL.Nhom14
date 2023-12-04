@@ -1,9 +1,7 @@
 package com.uit.sensordht;
 
-import android.app.Dialog;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,33 +9,24 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 
 import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.AxisBase;
 import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.Entry;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
-import com.github.mikephil.charting.formatter.IAxisValueFormatter;
-import com.github.mikephil.charting.formatter.IndexAxisValueFormatter;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.CurrentWeatherCallback;
-import com.uit.sensordht.Interface.DialogListener;
 import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.Weather;
 import com.uit.sensordht.Model.XAxisTimeFormatter;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SecondFragment extends DialogFragment {
+public class SecondTemperatureFragment extends DialogFragment {
     LineChart lineChart;
     int setValue = 0;
     private LineData data;
@@ -54,6 +43,17 @@ public class SecondFragment extends DialogFragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
+        APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
+            @Override
+            public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity) {
+                GlobalVars.currentTime = weather.time;
+            }
+
+            @Override
+            public void onFailure(String errorMessage) {
+
+            }
+        });
         InitViews(view);
         InitEvent();
         LiveChartData();
@@ -98,11 +98,7 @@ public class SecondFragment extends DialogFragment {
         xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
         xAxis.setTextSize(11f);
         xAxis.setTextColor(Color.RED);
-//        xAxis.setDrawAxisLine(true);
-//        xAxis.setDrawGridLines(true);
-//        xAxis.setDrawLabels(true);
-//        xAxis.setDrawGridLinesBehindData(true);
-        xAxis.setLabelCount(9, false);
+        xAxis.setLabelCount(10, false);
         xAxis.setValueFormatter(new XAxisTimeFormatter());
 
     }

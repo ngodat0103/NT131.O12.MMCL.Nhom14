@@ -1,7 +1,5 @@
 package com.uit.sensordht;
 
-import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,11 +11,16 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
 
-import com.uit.sensordht.Interface.DialogListener;
+import nl.joery.animatedbottombar.AnimatedBottomBar;
 
 public class TemperatureDialogFragment extends DialogFragment {
-    SecondFragment secondFragment;
+    DialogFragment secondFragment;
+    DialogFragment hourFragment;
+    AnimatedBottomBar navBar;
     public static TemperatureDialogFragment newInstance() {
         return new TemperatureDialogFragment();
     }
@@ -28,7 +31,7 @@ public class TemperatureDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_sheet_temperature, container, false);
 
         // Thêm Fragment vào Dialog
-        secondFragment = new SecondFragment();
+        secondFragment = new SecondTemperatureFragment();
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.fl_temperature, secondFragment) // R.id.fl_temperature là ID của layout trong dialog_sheet_temperature.xml để chứa Fragment
                 .commit();
@@ -41,6 +44,9 @@ public class TemperatureDialogFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         getDialog().getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_info);
         setCancelable(true);
+        hourFragment = new HourTemperatureFragment();
+        InitViews(view);
+        InitEvents();
     }
     @Override
     public void onResume() {
@@ -68,5 +74,43 @@ public class TemperatureDialogFragment extends DialogFragment {
             secondFragment = null; // Reset the reference to null
         }
     }
+    private void InitViews(View v)
+    {
+        navBar = v.findViewById(R.id.bottom_bar);
+    }
+    private void InitEvents() {
+        navBar.setOnTabSelectListener(new AnimatedBottomBar.OnTabSelectListener() {
+            @Override
+            public void onTabSelected(int lastIndex, @Nullable AnimatedBottomBar.Tab lastTab, int newIndex, @NonNull AnimatedBottomBar.Tab newTab) {
+                if(lastIndex == 0 && newIndex == 1)
+                    replaceFragmentRightToLeft(hourFragment);
+                else if(lastIndex == 1 && newIndex == 0)
+                    replaceFragmentLeftToRight(secondFragment);
+            }
 
+            @Override
+            public void onTabReselected(int i, @NonNull AnimatedBottomBar.Tab tab) {
+
+            }
+        });
+    }
+    public void replaceFragmentRightToLeft(DialogFragment fragment)
+    {
+        FragmentManager fm = getChildFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_in_right, R.anim.slide_out_left);
+
+        ft.replace(R.id.fl_temperature, fragment);
+        ft.commit();
+
+    }
+    public void replaceFragmentLeftToRight(DialogFragment fragment)
+    {
+        FragmentManager fm = getChildFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
+
+        ft.replace(R.id.fl_temperature, fragment);
+        ft.commit();
+    }
 }

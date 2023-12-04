@@ -1,6 +1,7 @@
 package com.uit.sensordht.Interface;
 
 import com.google.gson.JsonObject;
+import com.uit.sensordht.Model.HistoryWeather;
 import com.uit.sensordht.Model.Weather;
 
 import retrofit2.Call;
@@ -19,4 +20,7 @@ public interface APIInterface {
 //    @FormUrlEncoded
     @GET("https://server.uitprojects.com/current_temp")
     Call<Weather> getCurrent_temp();
+    @GET("https://server.uitprojects.com/history")
+    Call<HistoryWeather> getHistory_weather(@Field("right") String time, @Field("order") String order, @Field("limit") int limit);
 }
+

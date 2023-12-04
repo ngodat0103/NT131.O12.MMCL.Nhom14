@@ -22,6 +22,10 @@ public class APIManager {
     static final APIClient apiClient = new APIClient();
     static final APIInterface interfaceAPI = apiClient.getRetrofitInstance().create(APIInterface.class);
 //    static final APIInterface login = apiClient.getRetrofitInstance().create(APIInterface.class);
+    public static void fnGetHistoryWeather(CurrentWeatherCallback callback, long timestamp)
+    {
+        Call<Weather> call = interfaceAPI.getHistory_weather()
+    }
     public static void fnGetCurrentWeather(CurrentWeatherCallback callback)
     {
         Call<Weather> call = interfaceAPI.getCurrent_temp();
