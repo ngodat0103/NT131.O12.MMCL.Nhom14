@@ -42,7 +42,7 @@ dependencies {
     implementation ("com.airbnb.android:lottie:6.2.0")
     //Chart
     implementation ("nl.joery.animatedbottombar:library:1.1.0")
-
+    implementation ("com.github.Pfuster12:LiveChart:1.3.5")
     implementation ("com.github.PhilJay:MPAndroidChart:v3.1.0")
     testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test.ext:junit:1.1.5")

@@ -18,6 +18,7 @@ import android.widget.Toast;
 import com.airbnb.lottie.LottieAnimationView;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.CurrentWeatherCallback;
+import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.Weather;
 
@@ -86,6 +87,17 @@ public class HomeActivity extends AppCompatActivity {
             }
         });
         clTemperature.setOnClickListener(v ->  {
+            APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
+                @Override
+                public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity) {
+                    GlobalVars.currentTime = weather.time;
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+
+                }
+            });
             showDialogBarTemperature();
         });
     }
