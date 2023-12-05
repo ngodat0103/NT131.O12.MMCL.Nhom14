@@ -205,10 +205,11 @@ def current():
     humidity_mysql = general_statements["get_min_max"].format(type="humidity")
     temperature = database_module.access_database(temperature_mysql, (current_day_left, current_day_right))
     humidity = database_module.access_database(humidity_mysql, (current_day_left, current_day_right))
-
+    esp8266_delay = database_module.access_database(general_statements["get_device_info"], ("esp8266",))[0][1]
     response = {
         "type": "current time",
         "time": response_mysql[0][2],
+        "delay": esp8266_delay,
         "temperature": {
             "current": response_mysql[0][0],
             "min": temperature[len(temperature) - 1][0] if len(temperature) > 0 else None,
