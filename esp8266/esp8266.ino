@@ -1,7 +1,5 @@
-/*
-    This sketch establishes a TCP connection to a "quote of the day" service.
-    It sends a "hello" message, and then prints received data.
-*/
+void(* resetFunc) (void) = 0;
+
 
 #include <ESP8266WiFi.h>
 #include "DHTesp.h"
@@ -14,7 +12,7 @@ DHTesp dht;
 const char* ssid = STASSID;
 const char* password = STAPSK;
 int time_delay = 1000;
-const char* host = "192.168.1.206";
+const char* host = "192.168.1.9";
 const uint16_t port = 80;
 WiFiClient client;
 
@@ -62,8 +60,8 @@ void loop() {
   if (!client.connected()){
     Serial.println("Lost connection, try reconnect ");
     client.connect(host,port);
-    time_delay = 1000;
     delay(5000);
+    time_delay = 1000;
     return;
   }
   float temp = dht.getTemperature();
@@ -94,7 +92,9 @@ void loop() {
       unsigned char *buffer2 = new byte[4];
       client.readBytes(buffer2,2);
       int new_time_delay = *((int*) buffer2);
-      
+      if (new_time_delay == 0 || new_time_delay>99999999){
+        resetFunc();
+      }
       int status_code = 200;
 
       unsigned char *status_pointer = (uint8*) &status_code;

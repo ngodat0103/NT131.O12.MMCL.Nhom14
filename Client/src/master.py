@@ -1,12 +1,13 @@
 from share import *
 from time import sleep
 from threading import Thread
-from slave import changes, is_device_alive
+import share
 
 
-def listen_master(current_lock: Lock, func, func2):
+def listen_master(current_lock: Lock, func):
     master_socket = socket.socket(socket.AF_INET, type=socket.SOCK_STREAM)
     master_socket.connect(("servernhung", 2509))
+
     master_socket.settimeout(120)
 
     def reconnect() -> socket.socket:
@@ -18,15 +19,16 @@ def listen_master(current_lock: Lock, func, func2):
         return new_socket
 
     while True:
-        with lock:
-            if func2() is False:
+        try:
+            with current_lock:
+                is_device_alive = share.device_alive
+            if is_device_alive is False:
                 master_socket.send(False.to_bytes(length=1, byteorder="little", signed=False))
                 sleep(2)
                 continue
             else:
                 master_socket.send(True.to_bytes(length=1, byteorder="little", signed=False))
-        try:
-            command_code_bytes = receive(4, master_socket)
+                command_code_bytes = receive(4, master_socket)
         except:
             print("Some thing is not right from master, try to reconnect in 3 seconds")
             sleep(3)
@@ -51,6 +53,10 @@ def listen_master(current_lock: Lock, func, func2):
         sleep(2)
 
 
-from slave import is_device_alive
+def changes(new_delay):
+    with lock:
+        share.delay = new_delay
+        share.is_make_change = True
 
-listen_master_thread = Thread(target=listen_master, args=(lock, changes, is_device_alive))
+
+listen_master_thread = Thread(target=listen_master, args=(lock, changes))
