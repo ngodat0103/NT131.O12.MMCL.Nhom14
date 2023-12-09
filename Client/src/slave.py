@@ -86,7 +86,7 @@ def handle_socket(current_socket: socket.socket):
                 "time_primary": int(vn_time())
             }
             try:
-                response = requests.post("http://localhost/update_temp",
+                response = requests.post("http://servernhung/update_temp",
                                          data=json_dict,
                                          headers=headers, timeout=3)
             except requests.exceptions.ConnectionError:

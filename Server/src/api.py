@@ -1,6 +1,6 @@
 import asyncio
 import os
-from typing import Union, Annotated
+from typing import Annotated
 import numpy
 from fastapi import FastAPI, Form, Request, HTTPException, Response, status
 from starlette.responses import StreamingResponse, FileResponse
@@ -197,11 +197,9 @@ async def set_setting(response: Response,
             share.device = device_name
             share.iot_delay = time_delay
 
-
     if time_delay != 0:
         database_module.access_database(general_statements["update_setting_device"],
                                         (time_delay, war_temp, war_humidity, device_name))
-
 
     response.status_code = status.HTTP_204_NO_CONTENT
 

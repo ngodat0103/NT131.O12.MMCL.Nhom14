@@ -8,4 +8,4 @@ while True:
     master_thread.start()
     print("thread create")
     master_thread.join()
-    sleep(5000)
+    sleep(5)
