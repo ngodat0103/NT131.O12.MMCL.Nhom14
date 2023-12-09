@@ -182,7 +182,7 @@ def update_temp(time_primary: int, temperature: float, humidity: float) -> bool:
                                         )
     except mysql.connector.errors.IntegrityError:
         return False
-    to_thingsboard(temperature, humidity)
+    #to_thingsboard(temperature, humidity)
 
     response = database_module.access_database(general_statements["check_limit"], (temperature,))
     if len(response) == 1:

@@ -11,9 +11,9 @@ DHTesp dht;
 
 const char* ssid = STASSID;
 const char* password = STAPSK;
-int time_delay = 1000;
+int time_delay;
 const char* host = "192.168.1.9";
-const uint16_t port = 80;
+const uint16_t port = 81;
 WiFiClient client;
 
 void setup() {
@@ -52,6 +52,7 @@ void setup() {
   client.setTimeout(10000);
   Serial.print("Set time out: ");
   Serial.println(client.getTimeout());
+  time_delay=1000;
 
 
 }
@@ -93,6 +94,7 @@ void loop() {
       client.readBytes(buffer2,2);
       int new_time_delay = *((int*) buffer2);
       if (new_time_delay == 0 || new_time_delay>99999999){
+        Serial.println("reset call");
         resetFunc();
       }
       int status_code = 200;

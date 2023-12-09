@@ -6,7 +6,7 @@ import os
 USERNAME = os.getenv("username_mysql")
 PASSWORD = os.getenv("password_mysql")
 #HOST = "app.mariadb.uitprojects.com"
-HOST = "maria_db"
+HOST = "192.168.1.199"
 
 PORT = 3306
 DATABASE = "mobile_project"

@@ -5,39 +5,13 @@ import numpy
 from fastapi import FastAPI, Form, Request, HTTPException, Response, status
 from starlette.responses import StreamingResponse, FileResponse
 
-import database_module
+import share
 from handle_types_message_client_module import *
 from threading import Lock
 
 MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
-
-command_code_iot = 304
-iot_delay = 0
-iot_lock = Lock()
-device = "null"
-
-
-def get_common_code_iot():
-    with iot_lock:
-        return command_code_iot
-
-
-def get_device_name():
-    return device
-
-
-def get_iot_delay():
-    with iot_lock:
-        return iot_delay
-
-
-def reset_common_code_iot():
-    global iot_delay, command_code_iot
-    with iot_lock:
-        iot_delay = 0
-        command_code_iot = 304
-
+from share import iot_lock
 
 TEMP_PATH = os.getcwd() + "/tmp/"
 app = FastAPI()
@@ -215,12 +189,20 @@ async def set_setting(response: Response,
         response.status_code = status.HTTP_404_NOT_FOUND
         return HTTPException(status_code=404, detail="device not found")
 
-    global command_code_iot, iot_delay, device
     with iot_lock:
-        command_code_iot = 200
-        device = device_name
-        iot_delay = time_delay
+        if time_delay == 0:
+            share.command_code_iot = 0
+        else:
+            share.command_code_iot = 200
+            share.device = device_name
+            share.iot_delay = time_delay
+
+
+    if time_delay != 0:
+        database_module.access_database(general_statements["update_setting_device"],
+                                        (time_delay, war_temp, war_humidity, device_name))
+
+
     response.status_code = status.HTTP_204_NO_CONTENT
-    database_module.access_database(general_statements["update_setting_device"],
-                                    (time_delay, war_temp, war_humidity, device_name))
+
     return
