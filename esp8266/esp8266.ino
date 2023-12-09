@@ -12,8 +12,8 @@ DHTesp dht;
 const char* ssid = STASSID;
 const char* password = STAPSK;
 int time_delay;
-const char* host = "192.168.1.9";
-const uint16_t port = 81;
+const char* host = "192.168.1.206";
+const uint16_t port = 80;
 WiFiClient client;
 
 void setup() {

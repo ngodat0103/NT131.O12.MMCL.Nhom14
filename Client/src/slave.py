@@ -12,7 +12,7 @@ from share import share_lock,receive
 import share
 
 ras_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-ras_socket.bind(("0.0.0.0", 81))
+ras_socket.bind(("0.0.0.0", 80))
 ras_socket.listen(5)
 delay = 1000
 import pytz

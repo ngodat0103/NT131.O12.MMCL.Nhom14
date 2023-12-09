@@ -6,6 +6,5 @@ sleep(5)
 while True:
     master_thread = create_master_thread()
     master_thread.start()
-    print("thread create")
     master_thread.join()
     sleep(5)
