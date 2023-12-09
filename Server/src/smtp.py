@@ -15,7 +15,7 @@ def send_email_otp(random_otp: str, to_recipient: str = "ngovuminhdat@gmail.com"
     message = MIMEMultipart()
     message['From'] = SENDER_EMAIL
     message['Subject'] = "Recovery password"
-    with open(file='otp.html', mode='r', encoding='utf-8') as file_reader:
+    with open(file='warning_device_offline.html', mode='r', encoding='utf-8') as file_reader:
         html_content_string = file_reader.read()
     message['To'] = to_recipient
     recovery_email_html_string = html_content_string.format(random_otp=random_otp)
@@ -28,7 +28,6 @@ def send_email_otp(random_otp: str, to_recipient: str = "ngovuminhdat@gmail.com"
 
 
 def send_email_warning(emails: [str], temperature=None, humidity=None):
-
     for email in emails:
         message = MIMEMultipart()
         message['From'] = SENDER_EMAIL
@@ -36,7 +35,7 @@ def send_email_warning(emails: [str], temperature=None, humidity=None):
         with open(file='warning_sensors.html', mode='r', encoding='utf-8') as reader:
             html_content_string = reader.read()
         message['To'] = email
-        content_String = html_content_string.format(temperature=temperature,humidity=humidity)
+        content_String = html_content_string.format(temperature=temperature, humidity=humidity)
 
         message.attach(MIMEText(content_String, 'html'))
         with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
@@ -44,3 +43,19 @@ def send_email_warning(emails: [str], temperature=None, humidity=None):
             server.login(SMTP_USERNAME, SMTP_PASSWORD)
             server.send_message(message)
 
+
+def send_email_warning_device_off(emails: [str], device_name: str):
+    for email in emails:
+        message = MIMEMultipart()
+        message['From'] = SENDER_EMAIL
+        message['Subject'] = "Lost connection"
+        with open(file='warning_device_offline.html', mode='r', encoding='utf-8') as reader:
+            html_content_string = reader.read()
+        message['To'] = email
+        content_String = html_content_string.format(device_name=device_name)
+
+        message.attach(MIMEText(content_String, 'html'))
+        with smtplib.SMTP(SMTP_HOST, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.send_message(message)

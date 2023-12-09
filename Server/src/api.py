@@ -113,10 +113,9 @@ async def user_setting(response: Response,
     if len(response_mysql) == 0:
         response.status_code = status.HTTP_403_FORBIDDEN
         return HTTPException(status_code=403, detail="invalid token")
-    notification_int = int(notification)
 
     response_mysql = database_module.access_database(general_statements["set_user_notification"],
-                                                     (notification_int, refresh_token))
+                                                     (notification, refresh_token))
     response.status_code = status.HTTP_204_NO_CONTENT
     return None
 

@@ -12,7 +12,7 @@ from share import share_lock,receive
 import share
 
 ras_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-ras_socket.bind(("0.0.0.0", 80))
+ras_socket.bind(("0.0.0.0", 81))
 ras_socket.listen(5)
 delay = 1000
 import pytz
@@ -26,7 +26,7 @@ def vn_time() -> float:
 
 
 def handle_socket(current_socket: socket.socket):
-    current_socket.settimeout(120)
+    current_socket.settimeout(10)
 
     def make_changes(interval: int):
         current_socket.send(int(interval).to_bytes(length=2, byteorder="little", signed=False))
@@ -86,7 +86,7 @@ def handle_socket(current_socket: socket.socket):
                 "time_primary": int(vn_time())
             }
             try:
-                response = requests.post("http://servernhung/update_temp",
+                response = requests.post("http://localhost/update_temp",
                                          data=json_dict,
                                          headers=headers, timeout=3)
             except requests.exceptions.ConnectionError:
@@ -98,10 +98,10 @@ def handle_socket(current_socket: socket.socket):
             print("Humidity: " + humidity_str + "\n")
 
 
-        except Exception as e:
-            print(e)
+        except TimeoutError:
             with share_lock:
                 share.is_make_change = False
+                share.device_alive= False
             break
 
 

@@ -5,8 +5,8 @@ import os
 
 USERNAME = os.getenv("username_mysql")
 PASSWORD = os.getenv("password_mysql")
-#HOST = "app.mariadb.uitprojects.com"
-HOST = "maria_db"
+# HOST = "app.mariadb.uitprojects.com"
+HOST = "192.168.1.199"
 
 PORT = 3306
 DATABASE = "mobile_project"
@@ -77,6 +77,8 @@ general_statements: dict[str, str] = {
                        "where username=%s",
     "update_setting_device": "update iot_setting set delay = %s,war_temp= %s, war_humidity =%s where device_name = %s",
     "get_device_info": "select device_name,delay,war_temp,war_humidity from iot_setting where device_name = %s",
+    "get_device_status": "select online,reset from iot_devices where device_name = %s",
+    "update_device_status": "update iot_devices set online = %s where device_name = %s ",
     "check_limit": "select war_temp,war_humidity from iot_setting "
                    "where device_name ='esp8266' and (%s> war_temp)",
     "get_emails": "select email from account join account_setting on account.username = account_setting.username where notification = 1",
