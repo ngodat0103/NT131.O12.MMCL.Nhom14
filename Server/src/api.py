@@ -173,6 +173,7 @@ async def set_setting(response: Response,
                       time_delay: Annotated[int, Form()] = None,
                       war_temp: Annotated[float, Form()] = None,
                       war_humidity: Annotated[float, Form()] = None,
+                      reboot: Annotated[bool, Form()] = False,
                       device_name: Annotated[str, Form()] = "esp8266"):
     response_mysql = database_module.access_database(general_statements["authentication_token"],
                                                      (refresh_token,))
@@ -189,18 +190,36 @@ async def set_setting(response: Response,
         return HTTPException(status_code=404, detail="device not found")
 
     with share_lock:
-        if time_delay == 0:
-            share.command_code = share.REBOOT_ESP
-        else:
-            share.command_code = share.MAKE_CHANGES
-            share.device = device_name
-            share.iot_delay = time_delay
+        if reboot:
+            if device_name == "esp8266":
+                share.command_code = share.REBOOT_ESP
+            elif device_name == "ras":
+                share.command_code = share.REBOOT_RAS
 
-    if time_delay != 0:
-        if war_temp is not None and war_humidity is not None:
-            database_module.access_database(general_statements["update_setting_device"],
-                                            (time_delay, war_temp, war_humidity, device_name))
+            response.status_code = status.HTTP_200_OK
+            return HTTPException(status_code=200,detail=f"Because Reboot is True , All the remaining fields are ignored.")
+
 
     response.status_code = status.HTTP_204_NO_CONTENT
 
-    return
+    if time_delay is not None:
+        if time_delay == 0:
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return HTTPException(status_code=400, detail="Time delay can't not equal 0")
+        share.command_code = share.MAKE_CHANGES
+        share.device = device_name
+        share.iot_delay = time_delay
+        database_module.access_database("update iot_setting set delay = %s where device_name = %s",
+                                        (time_delay, device_name)
+                                        )
+
+    if war_temp is not None and war_humidity is None:
+        database_module.access_database(
+            "update iot_setting set war_temp = %s where device_name = %s", (war_temp, device_name)
+        )
+        return
+    elif war_humidity is not None and war_temp is None:
+        database_module.access_database(
+            "update iot_setting set war_humidity = %s where device_name = %s", (war_humidity, device_name)
+        )
+        return

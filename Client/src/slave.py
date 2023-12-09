@@ -12,7 +12,7 @@ from share import share_lock,receive
 import share
 
 ras_socket = socket.socket(family=socket.AF_INET, type=socket.SOCK_STREAM)
-ras_socket.bind(("0.0.0.0", 81))
+ras_socket.bind(("0.0.0.0", 80))
 ras_socket.listen(5)
 delay = 1000
 import pytz
@@ -86,7 +86,7 @@ def handle_socket(current_socket: socket.socket):
                 "time_primary": int(vn_time())
             }
             try:
-                response = requests.post("http://localhost/update_temp",
+                response = requests.post("http://servernhung/update_temp",
                                          data=json_dict,
                                          headers=headers, timeout=3)
             except requests.exceptions.ConnectionError:
