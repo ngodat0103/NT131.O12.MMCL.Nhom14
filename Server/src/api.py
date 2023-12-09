@@ -11,7 +11,7 @@ from threading import Lock
 
 MESSAGE_STREAM_DELAY = 1  # second
 MESSAGE_STREAM_RETRY_TIMEOUT = 15000
-from share import iot_lock
+from share import share_lock
 
 TEMP_PATH = os.getcwd() + "/tmp/"
 app = FastAPI()
@@ -169,10 +169,10 @@ async def temp_update(response: Response, time_primary: Annotated[int, Form()],
 
 @app.post("/device/set-setting", tags=['Devices'])
 async def set_setting(response: Response,
-                      time_delay: Annotated[int, Form()],
                       refresh_token: Annotated[str, Form()],
-                      war_temp: Annotated[float, Form()],
-                      war_humidity: Annotated[float, Form()],
+                      time_delay: Annotated[int, Form()] = None,
+                      war_temp: Annotated[float, Form()] = None,
+                      war_humidity: Annotated[float, Form()] = None,
                       device_name: Annotated[str, Form()] = "esp8266"):
     response_mysql = database_module.access_database(general_statements["authentication_token"],
                                                      (refresh_token,))
@@ -188,17 +188,18 @@ async def set_setting(response: Response,
         response.status_code = status.HTTP_404_NOT_FOUND
         return HTTPException(status_code=404, detail="device not found")
 
-    with iot_lock:
+    with share_lock:
         if time_delay == 0:
-            share.command_code_iot = 0
+            share.command_code = share.REBOOT_ESP
         else:
-            share.command_code_iot = 200
+            share.command_code = share.MAKE_CHANGES
             share.device = device_name
             share.iot_delay = time_delay
 
     if time_delay != 0:
-        database_module.access_database(general_statements["update_setting_device"],
-                                        (time_delay, war_temp, war_humidity, device_name))
+        if war_temp is not None and war_humidity is not None:
+            database_module.access_database(general_statements["update_setting_device"],
+                                            (time_delay, war_temp, war_humidity, device_name))
 
     response.status_code = status.HTTP_204_NO_CONTENT
 

@@ -1,8 +1,11 @@
 from threading import Lock
 
-command_code_iot = 304
+command_code = 304
 iot_delay = 0
-iot_lock = Lock()
+share_lock = Lock()
 device = "null"
 
-
+REQUEST_STATUS = 100
+MAKE_CHANGES = 200
+REBOOT_ESP = 0
+KEEP_CONFIG = 304
