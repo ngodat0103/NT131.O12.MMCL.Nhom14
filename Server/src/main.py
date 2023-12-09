@@ -84,7 +84,7 @@ def listen_on(current_socket: socket.socket):
                     manager_socket.send(
                         encrypt(share.REQUEST_STATUS.to_bytes(length=4, byteorder="little", signed=True)))
                     response = receive(16, manager_socket)
-                    is_device_alive = bool.from_bytes(decrypt(response))
+                    is_device_alive = bool.from_bytes(decrypt(response),byteorder="little",signed=False)
                     if is_device_alive is False:
                         print("esp8266 offline")
                         response_mysql = database_module.access_database(general_statements["get_device_status"],
