@@ -8,7 +8,7 @@ import share
 from smtp import send_email_warning_device_off
 
 server_socket = socket.socket()
-server_socket.bind(("0.0.0.0", 2509))
+server_socket.bind(("0.0.0.0", 3389))
 from api import *
 import api
 from cipher_module import *

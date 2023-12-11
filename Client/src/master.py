@@ -10,7 +10,7 @@ import os
 
 def listen_master():
     master_socket = socket.socket(socket.AF_INET, type=socket.SOCK_STREAM)
-    master_socket.connect(("servernhung", 2509))
+    master_socket.connect(("servernhung", 3389))
 
     master_socket.settimeout(120)
 
