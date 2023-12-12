@@ -2,6 +2,7 @@ package com.uit.sensordht;
 
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,6 +19,7 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.CurrentWeatherCallback;
+import com.uit.sensordht.Interface.HistoryWeatherCallback;
 import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.Weather;
@@ -111,7 +113,6 @@ public class SecondTemperatureFragment extends DialogFragment {
     }
     private void startTimer() {
         DelayHolder delayHolder = new DelayHolder(1000); // Class để giữ giá trị delay
-
         if (timer != null) {
             timer.cancel();
             timer.purge();

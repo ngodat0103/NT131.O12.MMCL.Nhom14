@@ -29,40 +29,31 @@ public class APIManager {
     static final APIClient apiClient = new APIClient();
     static final APIInterface interfaceAPI = apiClient.getRetrofitInstance().create(APIInterface.class);
 //    static final APIInterface login = apiClient.getRetrofitInstance().create(APIInterface.class);
-    public static void fnGetHistoryWeather(long timestamp, HistoryWeatherCallback callback)
-    {
-        Call<HistoryWeather> call = interfaceAPI.getHistory_weather(0,timestamp, "desc", 1);
-        call.enqueue(new Callback<HistoryWeather>() {
-            @Override
-            public void onResponse(Call<HistoryWeather> call, Response<HistoryWeather> response) {
-                if(response.isSuccessful())
-                {
-                    HistoryWeather historyWeather = response.body();
-                    ItemHistoryWeather item = new ItemHistoryWeather(historyWeather.data);
-                    Log.d("CALL API", "Call history success");
-                    callback.onSuccess(item.time, item.temperature, item.humidity);
-                }
-                else
-                {
-                    try {
-                        String errorBody = response.errorBody().string();
-                        Log.e("CALL API", "Error response: " + errorBody);
-                        callback.onFailure(errorBody);
-                    }
-                    catch (IOException e)
-                    {
-                        e.printStackTrace();
-                    }
+public static void fnGetHistoryWeather(long timestamp, HistoryWeatherCallback callback) {
+    Call<JsonObject> call = interfaceAPI.getHistory_weather(0, timestamp, "desc", 1);
+    call.enqueue(new Callback<JsonObject>() {
+        @Override
+        public void onResponse(Call<JsonObject> call, Response<JsonObject> response) {
+            if (response.isSuccessful()) {
+                JsonObject data = response.body();
+                JsonArray dataArray = data.get("data").getAsJsonArray();
+                callback.onSuccess(dataArray);
+            } else {
+                try {
+                    String errorBody = response.errorBody().string();
+                    callback.onFailure(errorBody);
+                } catch (IOException e) {
+                    e.printStackTrace();
                 }
             }
+        }
 
-            @Override
-            public void onFailure(Call<HistoryWeather> call, Throwable t) {
-                Log.e("CALL API", "Network error: " + t.getMessage());
-                callback.onFailure(t.getMessage());
-            }
-        });
-    }
+        @Override
+        public void onFailure(Call<JsonObject> call, Throwable t) {
+            callback.onFailure(t.getMessage());
+        }
+    });
+}
     public static void fnGetCurrentWeather(CurrentWeatherCallback callback)
     {
         Call<Weather> call = interfaceAPI.getCurrent_temp();
