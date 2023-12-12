@@ -1,15 +1,14 @@
 import java.io.*;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Monitor {
+public class Monitor_background {
 
-    public Monitor() throws IOException, InterruptedException {
+    public Monitor_background() throws IOException, InterruptedException {
 
     }
 
@@ -18,7 +17,7 @@ public class Monitor {
         while (true){
             List<Device> list_device = new ArrayList<>();
 
-            URL url = new URL("http://localhost/device/monitor");
+            URL url = new URL("https://server.uitprojects.com/device/monitor");
             HttpURLConnection con = (HttpURLConnection) url.openConnection();
             con.setRequestMethod("GET");
             con.setReadTimeout(120000);
