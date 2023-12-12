@@ -29,7 +29,7 @@ import java.util.TimeZone;
 
 public class HomeActivity extends AppCompatActivity {
     TextView tvHumidity, tvTemperature, tvTime, tvMinHumidity, tvMaxHumidity, tvMinTemperature, tvMaxTemperature;
-    ConstraintLayout clTemperature;
+    ConstraintLayout clTemperature, clHumidity;
     public Fragment secondFragment;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +41,7 @@ public class HomeActivity extends AppCompatActivity {
         tvMinHumidity = findViewById(R.id.tvLowHumidity);
         tvMaxHumidity = findViewById(R.id.tvHighHumidity);
         clTemperature = findViewById(R.id.clTemperature);
+        clHumidity = findViewById(R.id.clHumidity);
         tvMinTemperature = findViewById(R.id.tvMin);
         tvMaxTemperature = findViewById(R.id.tvMax);
         APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
@@ -100,11 +101,31 @@ public class HomeActivity extends AppCompatActivity {
             });
             showDialogBarTemperature();
         });
+        clHumidity.setOnClickListener(v -> {
+            APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
+                @Override
+                public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity, int delayTime) {
+                    GlobalVars.currentTime = weather.time;
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+
+                }
+            });
+            showDialogBarHumidity();
+        });
     }
     public void showDialogBarTemperature() {
         // Trong Fragment hoặc Activity
         TemperatureDialogFragment temperatureDialogFragment = TemperatureDialogFragment.newInstance();
         temperatureDialogFragment.show(getSupportFragmentManager(), "temperature_dialog");
+
+    }
+    public void showDialogBarHumidity() {
+        // Trong Fragment hoặc Activity
+        HumidityDialogFragment humidityDialogFragment = HumidityDialogFragment.newInstance();
+        humidityDialogFragment.show(getSupportFragmentManager(), "temperature_dialog");
 
     }
 

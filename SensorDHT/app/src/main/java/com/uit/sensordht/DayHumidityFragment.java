@@ -4,44 +4,29 @@ import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.DatePicker;
-import android.widget.Spinner;
 import android.widget.TimePicker;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatButton;
 import androidx.fragment.app.DialogFragment;
 
-import com.github.mikephil.charting.charts.LineChart;
-import com.github.mikephil.charting.components.XAxis;
-import com.github.mikephil.charting.components.YAxis;
-import com.github.mikephil.charting.data.LineData;
-import com.github.mikephil.charting.data.LineDataSet;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.jjoe64.graphview.DefaultLabelFormatter;
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GridLabelRenderer;
 import com.jjoe64.graphview.series.DataPoint;
-import com.jjoe64.graphview.series.DataPointInterface;
 import com.jjoe64.graphview.series.LineGraphSeries;
-import com.jjoe64.graphview.series.OnDataPointTapListener;
-import com.jjoe64.graphview.series.Series;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.HistoryWeatherCallback;
-import com.uit.sensordht.Model.GlobalVars;
-import com.uit.sensordht.Model.ItemHistoryWeather;
-import com.uit.sensordht.Model.XAxisTimeFormatter;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -52,7 +37,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
-public class HourTemperatureFragment extends DialogFragment {
+public class DayHumidityFragment extends DialogFragment{
     AppCompatButton btTimePicker;
     long previousTimeDay;
     GraphView graphView;
@@ -152,7 +137,7 @@ public class HourTemperatureFragment extends DialogFragment {
             if (jsonArray != null && jsonArray.size() > 0) {
                 JsonObject jsonObject = jsonArray.get(0).getAsJsonObject();
                 long timestamp = jsonObject.get("time").getAsLong();
-                float value = jsonObject.get("temperature").getAsFloat();
+                float value = jsonObject.get("humidity").getAsFloat();
                 dataList.add(new Pair<>(timestamp, value));
             }
         }
@@ -163,12 +148,12 @@ public class HourTemperatureFragment extends DialogFragment {
 
     private void loadTemperatureData(long timeCurrent) {
         dataChart = new HashMap<>();
-        long temp = timeCurrent / 1000 - 3600;
-        final int numberOfRequests = 10;
+        long temp = timeCurrent / 1000 - 86400;
+        final int numberOfRequests = 11;
         previousTimeDay = temp;
         for (int i = 0; i < numberOfRequests; i++) {
             final int index = i;
-            long timestamp = temp + (i * 300);
+            long timestamp = temp + (i * (86400 / 11));
             nextTimeDay = timestamp;
             APIManager.fnGetHistoryWeather(timestamp, new HistoryWeatherCallback() {
                 @Override
@@ -213,7 +198,7 @@ public class HourTemperatureFragment extends DialogFragment {
         graphView.setAnimation(animation);
 
         graphView.getGridLabelRenderer().setNumHorizontalLabels(10);
-        graphView.getGridLabelRenderer().setNumVerticalLabels(10);
+        graphView.getGridLabelRenderer().setNumVerticalLabels(11);
         GridLabelRenderer gridLabelRenderer = graphView.getGridLabelRenderer();
         gridLabelRenderer.setLabelFormatter(new DefaultLabelFormatter() {
             @Override
@@ -237,8 +222,8 @@ public class HourTemperatureFragment extends DialogFragment {
 
         }
         graphView.getViewport().setYAxisBoundsManual(true);
-        graphView.getViewport().setMinY(20);
-        graphView.getViewport().setMaxY(36);
+        graphView.getViewport().setMinY(0);
+        graphView.getViewport().setMaxY(100);
 //        graphView.getViewport().setDrawBorder(true);
         graphView.getViewport().setScalable(true);
         graphView.invalidate();

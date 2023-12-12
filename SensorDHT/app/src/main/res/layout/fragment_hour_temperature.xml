@@ -4,14 +4,14 @@
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/white">
-    <Button
+    <androidx.appcompat.widget.AppCompatButton
         android:layout_width="300dp"
         android:layout_height="60dp"
         android:id="@+id/btTimePicker1"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
-        android:drawableStart="@drawable/ic_day"
-        android:background="@drawable/bg_dialog"
+        app:layout_constraintRight_toRightOf="parent"
+        android:background="@drawable/bg_button"
         android:textSize="20sp"
         android:textAlignment="center"
         />
