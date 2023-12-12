@@ -84,7 +84,7 @@ def listen_on(current_socket: socket.socket):
                     manager_socket.send(
                         encrypt(share.REQUEST_STATUS.to_bytes(length=4, byteorder="little", signed=True)))
                     response = receive(16, manager_socket)
-                    is_device_alive = bool.from_bytes(decrypt(response),byteorder="little",signed=False)
+                    is_device_alive = bool.from_bytes(decrypt(response), byteorder="little", signed=False)
                     if is_device_alive is False:
                         print("esp8266 offline")
                         response_mysql = database_module.access_database(general_statements["get_device_status"],
@@ -102,7 +102,7 @@ def listen_on(current_socket: socket.socket):
                     with share_lock:
                         share.command_code = share.KEEP_CONFIG
                         database_module.access_database(general_statements["update_device_status"], (True, "esp8266"))
-            except ConnectionError:
+            except ConnectionError | ValueError:
                 response_mysql = database_module.access_database(general_statements["get_device_status"], ("ras",))
                 if response_mysql[0][0] == 1 and response_mysql[0][1] == 0:
                     response_mysql = database_module.access_database(general_statements["get_emails"])
@@ -112,7 +112,7 @@ def listen_on(current_socket: socket.socket):
                     send_email_thread.start()
 
                 database_module.access_database(general_statements["update_device_status"], (False, "ras"))
-                print("Ras has close connection")
+                print("Something not right from Ras,close connection")
                 break
 
             pooling += 1
