@@ -1,3 +1,5 @@
+package com.uit.sensordht.monitor;
+
 public class Device {
     public String device_name;
     public int is_online;

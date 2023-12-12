@@ -154,6 +154,32 @@ async def get_device_info(response: Response, device_name: str = "esp8266"):
     return device_info(device_name)
 
 
+@app.get("/device/monitor", tags=["Devices"])
+async def monitor():
+    async def generator():
+        response = database_module.access_database("select device_name, online from iot_devices")
+        data = b""
+        for row in response:
+            data += row[0].encode() + b","
+
+        data += b"\n"
+        yield data
+        while True:
+            response = database_module.access_database("select device_name, online from iot_devices")
+            data = b""
+
+            for row in response:
+                data += row[1].to_bytes(byteorder="little",signed=False,length=4)
+
+            yield data
+
+            await asyncio.sleep(2)
+
+    return StreamingResponse(generator())
+
+    pass
+
+
 @app.post("/update_temp", tags=['Sensors'])
 async def temp_update(response: Response, time_primary: Annotated[int, Form()],
                       temperature: Annotated[float, Form()],
@@ -197,8 +223,8 @@ async def set_setting(response: Response,
                 share.command_code = share.REBOOT_RAS
 
             response.status_code = status.HTTP_200_OK
-            return HTTPException(status_code=200,detail=f"Because Reboot is True , All the remaining fields are ignored.")
-
+            return HTTPException(status_code=200,
+                                 detail=f"Because Reboot is True , All the remaining fields are ignored.")
 
     response.status_code = status.HTTP_204_NO_CONTENT
 
