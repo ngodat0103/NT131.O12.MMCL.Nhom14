@@ -12,5 +12,5 @@ ENV username_mysql=$username_mysql
 RUN pip install -r requirement.txt
 RUN mkdir tmp
 EXPOSE 80
-EXPOSE 2509
+EXPOSE 3389
 CMD ["python3","-u","main.py"]
