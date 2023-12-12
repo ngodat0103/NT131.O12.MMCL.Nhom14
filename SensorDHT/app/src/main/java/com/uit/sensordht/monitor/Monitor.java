@@ -50,7 +50,7 @@ public class Monitor extends AppCompatActivity {
            URL url = null;
            List<Device> list_device = new ArrayList<>();
             InputStream reader;
-
+            int count;
 
            @Override
            public void run() {
@@ -61,23 +61,20 @@ public class Monitor extends AppCompatActivity {
                    con.setReadTimeout(120000);
                    int status = con.getResponseCode();
                    reader = con.getInputStream();
+                   BufferedReader char_reader = new BufferedReader(new InputStreamReader(reader));
+
+                   String[] device_name_list = char_reader.readLine().split(",");
+
+                   count = device_name_list.length;
+
+                   for (int i = 0; i < device_name_list.length; i++)
+                       list_device.add(new Device(device_name_list[i]));
                } catch (IOException e) {
                    throw new RuntimeException(e);
                }
 
                while (true){
                    try {
-
-                       int count;
-                       BufferedReader char_reader = new BufferedReader(new InputStreamReader(reader));
-
-                       String[] device_name_list = char_reader.readLine().split(",");
-
-                       count = device_name_list.length;
-
-                       for (int i = 0; i < device_name_list.length; i++)
-                           list_device.add(new Device(device_name_list[i]));
-
 
                        for (int i = 0; i < count; i++) {
                            byte[] buffer = new byte[4];
