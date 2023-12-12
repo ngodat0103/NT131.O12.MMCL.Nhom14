@@ -4,6 +4,8 @@ import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
@@ -24,13 +26,15 @@ import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class Monitor extends AppCompatActivity {
-    Thread esp_Thread;
     TextView esp,ras;
     Thread background_Thread ;
+    Button reboot_ras,reboot_esp;
+
 
     @Override
     protected void onStart() {
@@ -44,6 +48,80 @@ public class Monitor extends AppCompatActivity {
         setContentView(R.layout.monitor);
         esp = findViewById(R.id.esp_value);
         ras  = findViewById(R.id.ras_value);
+        reboot_esp = findViewById(R.id.btn_esp_reboot);
+        reboot_esp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Thread thread = new Thread(new Runnable() {
+
+                    final Map<String,String> parameter = new HashMap<>();
+                    @Override
+                    public void run() {
+                        try {
+                            parameter.put("refresh_token",GlobalVars.refresh_token);
+                            parameter.put("reboot","true");
+                            parameter.put("device_name","esp8266");
+                            CustomRequest request = new CustomRequest(
+                                    "https://server.uitprojects.com/device/set-setting",
+                                    "POST",
+                                    null,
+                                    parameter
+                                    );
+
+                            Map<String,String> response = request.sendRequest();
+                            int stop = 0 ;
+
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+                thread.start();
+            }
+        });
+
+
+
+
+
+
+
+        reboot_ras = findViewById(R.id.btn_ras_reboot);
+        reboot_ras.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Thread thread = new Thread(new Runnable() {
+
+                    final Map<String,String> parameter = new HashMap<>();
+                    @Override
+                    public void run() {
+                        try {
+                            parameter.put("refresh_token",GlobalVars.refresh_token);
+                            parameter.put("reboot","true");
+                            parameter.put("device_name","ras");
+                            CustomRequest request = new CustomRequest(
+                                    "https://server.uitprojects.com/device/set-setting",
+                                    "POST",
+                                    null,
+                                    parameter
+                            );
+
+                            Map<String,String> response = request.sendRequest();
+                            int stop = 0 ;
+
+                        } catch (IOException e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                });
+                thread.start();
+            }
+        });
+
+
+
+
+
 
 
        background_Thread =new Thread(new Runnable() {
