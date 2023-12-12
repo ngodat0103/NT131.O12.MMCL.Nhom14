@@ -9,6 +9,7 @@ import retrofit2.http.Field;
 import retrofit2.http.FormUrlEncoded;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
+import retrofit2.http.Query;
 
 public interface APIInterface {
     @FormUrlEncoded
@@ -21,6 +22,9 @@ public interface APIInterface {
     @GET("https://server.uitprojects.com/current_temp")
     Call<Weather> getCurrent_temp();
     @GET("https://server.uitprojects.com/history")
-    Call<HistoryWeather> getHistory_weather(@Field("right") String time, @Field("order") String order, @Field("limit") int limit);
+    Call<HistoryWeather> getHistory_weather(@Query("left") long left,
+                                            @Query("right") long right,
+                                            @Query("order") String order,
+                                            @Query("limit") int limit);
 }
 

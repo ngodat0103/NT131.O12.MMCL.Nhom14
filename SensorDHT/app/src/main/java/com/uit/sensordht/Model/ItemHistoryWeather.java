@@ -8,7 +8,7 @@ public class ItemHistoryWeather {
     public long time;
     public float temperature;
     public float humidity;
-    ItemHistoryWeather(JsonArray array)
+    public ItemHistoryWeather(JsonArray array)
     {
         JsonObject data = array.get(0).getAsJsonObject();
         this.time = data.get("time").getAsLong();

@@ -1,12 +1,16 @@
 package com.uit.sensordht;
 
+import android.app.DatePickerDialog;
 import android.app.TimePickerDialog;
 import android.graphics.Color;
 import android.os.Bundle;
+import android.util.Log;
+import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.DatePicker;
 import android.widget.Spinner;
 import android.widget.TimePicker;
 
@@ -19,17 +23,21 @@ import com.github.mikephil.charting.components.XAxis;
 import com.github.mikephil.charting.components.YAxis;
 import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
+import com.uit.sensordht.API.APIManager;
+import com.uit.sensordht.Interface.HistoryWeatherCallback;
+import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.XAxisTimeFormatter;
 
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 
 public class HourTemperatureFragment extends DialogFragment {
     Button btTimePicker;
-    LineChart lineChart;
-    LineData data;
-    XAxis xAxis;
-    YAxis yAxisRight, yAxisLeft;
+    long previousTimeDay;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -47,77 +55,48 @@ public class HourTemperatureFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         InitViews(view);
         InitEvent();
+
     }
     private void InitViews(View v)
     {
         btTimePicker = v.findViewById(R.id.btTimePicker);
     }
     private void InitEvent() {
-        btTimePicker.setOnClickListener(v -> {
-            final Calendar calendar = Calendar.getInstance();
-            int hour = calendar.get(Calendar.HOUR_OF_DAY);
-            int minute = calendar.get(Calendar.MINUTE);
+        APIManager.fnGetHistoryWeather(GlobalVars.currentTime, new HistoryWeatherCallback() {
+            @Override
+            public void onSuccess(long timestamp, float temperature, float humidity) {
+                Log.d("API CALL", String.valueOf(temperature));
+            }
 
-            TimePickerDialog timePickerDialog = new TimePickerDialog(
-                    requireContext(),
-                    new TimePickerDialog.OnTimeSetListener() {
-                        @Override
-                        public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
-                            btTimePicker.setText(String.format(Locale.getDefault(), "%02d:%02d", hourOfDay, minute));
-                        }
-                    },
-                    hour,
-                    minute,
-                    true // set true if you want 24-hour time, false for AM/PM
-            );
+            @Override
+            public void onFailure(String errorMessage) {
 
-            timePickerDialog.show(); // Show the TimePickerDialog
+            }
         });
-
     }
-    private void LiveChartDate(long timestamp)
-    {
-        long timestampDesc = timestamp;
-        setupChart();
-        LineDataSet dataSet = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
-        if (dataSet == null) {
-            dataSet = createSet();
-            data.addDataSet(dataSet);
+    private List<Pair<Long, Float>> fnSetTime(long timeCurrent) {
+        List<Pair<Long, Float>> dataList = new ArrayList<>();
+        Date date = new Date(timeCurrent);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.HOUR, -1);
+        previousTimeDay = calendar.getTimeInMillis() / 1000;
+
+        for (int i = 0; i < 10; i++) {
+            APIManager.fnGetHistoryWeather(previousTimeDay, new HistoryWeatherCallback() {
+                @Override
+                public void onSuccess(long timestamp, float temperature, float humidity) {
+                    dataList.add(new Pair<>(timestamp, temperature));
+                }
+
+                @Override
+                public void onFailure(String errorMessage) {
+
+                }
+            });
+            previousTimeDay += 300;
         }
-        for(int i = 0; i < 10; i++)
-        {
-            timestampDesc -= 300;
-        }
-    }
-    private LineDataSet createSet() {
-        LineDataSet set = new LineDataSet(null, "Real-time Data");
-        set.setMode(LineDataSet.Mode.CUBIC_BEZIER);
-        set.setDrawCircles(false);
-        set.setLineWidth(4f);
-        set.setColor(R.drawable.bg_temperature);
-        set.setDrawValues(true);
-        set.setDrawCircles(true);
-        return set;
-    }
-    private void setupChart() {
-        data = new LineData();
-        lineChart.setData(data);
-        //Y-Axis
-        yAxisRight = lineChart.getAxisRight();
-        yAxisLeft = lineChart.getAxisLeft();
-        yAxisRight.setDrawAxisLine(false);
-        yAxisRight.setDrawLabels(false);
-        yAxisRight.setDrawGridLines(false);
-        yAxisLeft.setAxisMinimum(20f);
-        yAxisLeft.setAxisMaximum(40f);
-
-        //X-axis
-        xAxis = lineChart.getXAxis();
-        xAxis.setPosition(XAxis.XAxisPosition.BOTTOM);
-        xAxis.setTextSize(11f);
-        xAxis.setTextColor(Color.RED);
-        xAxis.setLabelCount(10, false);
-        xAxis.setValueFormatter(new XAxisTimeFormatter());
-
+        Log.d("Temperature", dataList.get(1).toString());
+        return dataList;
     }
 }

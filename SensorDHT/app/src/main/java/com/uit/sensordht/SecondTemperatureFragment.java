@@ -32,6 +32,8 @@ public class SecondTemperatureFragment extends DialogFragment {
     private LineData data;
     private XAxis xAxis;
     private YAxis yAxisLeft, yAxisRight;
+    TimerTask timerTask;
+    final int period = 1000;
 
     Timer timer;
     @Override
@@ -45,7 +47,7 @@ public class SecondTemperatureFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
             @Override
-            public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity) {
+            public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity, int day) {
                 GlobalVars.currentTime = weather.time;
             }
 
@@ -105,15 +107,26 @@ public class SecondTemperatureFragment extends DialogFragment {
     private void LiveChartData()
     {
         setupChart();
+        startTimer();
+    }
+    private void startTimer() {
+        DelayHolder delayHolder = new DelayHolder(1000); // Class để giữ giá trị delay
+
+        if (timer != null) {
+            timer.cancel();
+            timer.purge();
+        }
+
         timer = new Timer();
-        timer.scheduleAtFixedRate(new TimerTask() {
+        timerTask = new TimerTask() {
             @Override
             public void run() {
-                getActivity().runOnUiThread(() ->{
+                getActivity().runOnUiThread(() -> {
                     APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
                         @Override
-                        public void onSuccess(Weather weather, ItemWeather temperatureData, ItemWeather humidityData) {
-                            float newValue = temperatureData.current;
+                        public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity, int delay) {
+                            float newValue = temperature.current;
+                            delayHolder.setDelay(delay); // Cập nhật giá trị delay từ hàm onSuccess
                             LineDataSet dataSet = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
                             if (dataSet == null) {
                                 dataSet = createSet();
@@ -121,19 +134,15 @@ public class SecondTemperatureFragment extends DialogFragment {
                             }
                             xAxis.setAxisMaximum(GlobalVars.currentTime + setValue);
                             data.addEntry(new Entry(dataSet.getEntryCount(), newValue), 0);
-                            if(setValue > 9)
-                            {
-                                lineChart.moveViewToX(setValue - 9);
-                            }
 
-                                data.notifyDataChanged();
-                                xAxis.setDrawGridLinesBehindData(true);
+                            data.notifyDataChanged();
+                            xAxis.setDrawGridLinesBehindData(true);
 
-                                setValue++;
-                                lineChart.notifyDataSetChanged();
-                                lineChart.fitScreen();
-                                lineChart.setVisibleXRangeMaximum(10);
-                                lineChart.invalidate();
+                            setValue += 5;
+                            lineChart.notifyDataSetChanged();
+                            lineChart.fitScreen();
+                            lineChart.setVisibleXRangeMaximum(10);
+                            lineChart.invalidate();
                         }
 
                         @Override
@@ -141,12 +150,30 @@ public class SecondTemperatureFragment extends DialogFragment {
 
                         }
                     });
-
-
                 });
             }
-        }, 0, 1000);
+        };
+
+        timer.schedule(timerTask, 0, delayHolder.getDelay()); // Sử dụng giá trị delay từ holder
     }
+
+    // Class để giữ giá trị delay
+    private static class DelayHolder {
+        private int delay;
+
+        DelayHolder(int delay) {
+            this.delay = delay;
+        }
+
+        int getDelay() {
+            return delay;
+        }
+
+        void setDelay(int delay) {
+            this.delay = delay;
+        }
+    }
+
     @Override
     public void onDestroyView() {
         super.onDestroyView();
@@ -156,4 +183,3 @@ public class SecondTemperatureFragment extends DialogFragment {
         }
     }
 }
-

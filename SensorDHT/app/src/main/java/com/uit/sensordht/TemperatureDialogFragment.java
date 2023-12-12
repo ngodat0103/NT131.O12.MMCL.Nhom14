@@ -107,6 +107,7 @@ public class TemperatureDialogFragment extends DialogFragment {
     public void replaceFragmentLeftToRight(DialogFragment fragment)
     {
         FragmentManager fm = getChildFragmentManager();
+
         FragmentTransaction ft = fm.beginTransaction();
         ft.setCustomAnimations(R.anim.slide_in_left, R.anim.slide_out_right);
 

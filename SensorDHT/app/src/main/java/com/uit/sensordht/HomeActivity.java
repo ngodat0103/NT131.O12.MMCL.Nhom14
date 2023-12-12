@@ -45,7 +45,7 @@ public class HomeActivity extends AppCompatActivity {
         tvMaxTemperature = findViewById(R.id.tvMax);
         APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
             @Override
-            public void onSuccess(Weather weather, ItemWeather temperatureData, ItemWeather humidityData) {
+            public void onSuccess(Weather weather, ItemWeather temperatureData, ItemWeather humidityData, int delayTime) {
                 long timestamp = (weather.time) * 1000;
                 Calendar calendar = Calendar.getInstance();
                 calendar.setTimeInMillis(timestamp);
@@ -89,7 +89,7 @@ public class HomeActivity extends AppCompatActivity {
         clTemperature.setOnClickListener(v ->  {
             APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
                 @Override
-                public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity) {
+                public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity, int delayTime) {
                     GlobalVars.currentTime = weather.time;
                 }
 

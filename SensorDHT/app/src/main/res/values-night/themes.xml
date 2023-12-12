@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <!-- Base application theme. -->
-    <style name="Base.Theme.SensorDHT" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="Base.Theme.SensorDHT" parent="Theme.MaterialComponents.DayNight.NoActionBar">
         <!-- Customize your dark theme here. -->
         <!-- <item name="colorPrimary">@color/my_dark_primary</item> -->
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -10,4 +10,6 @@
         <item name="android:windowEnterAnimation">@anim/slide_in_bottom</item>
         <item name="android:windowExitAnimation">@anim/slide_out_bottom</item>
     </style>
+    <style name="Theme.SensorDHT" parent="Base.Theme.SensorDHT" />
+
 </resources>

@@ -25,6 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="20dp"
+        android:background="@drawable/bg_edittext"
         app:layout_constraintTop_toBottomOf="@id/tvSignIn"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
@@ -44,6 +45,7 @@
         app:layout_constraintTop_toBottomOf="@id/tilUsername"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
+        android:background="@drawable/bg_edittext"
         android:hint="Password">
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/tietPassword"

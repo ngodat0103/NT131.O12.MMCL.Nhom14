@@ -6,4 +6,5 @@ import com.google.gson.annotations.SerializedName;
 public class HistoryWeather {
     @SerializedName("data")
     public JsonArray data;
+
 }

@@ -1,18 +1,25 @@
 package com.uit.sensordht.API;
 
 import android.util.Log;
+import android.util.Pair;
 
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.uit.sensordht.Interface.APIInterface;
 import com.uit.sensordht.Interface.CreateUserCallback;
 import com.uit.sensordht.Interface.CurrentWeatherCallback;
+import com.uit.sensordht.Interface.HistoryWeatherCallback;
 import com.uit.sensordht.Interface.LoginUserCallback;
 import com.uit.sensordht.Model.GlobalVars;
+import com.uit.sensordht.Model.HistoryWeather;
+import com.uit.sensordht.Model.ItemHistoryWeather;
 import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.User;
 import com.uit.sensordht.Model.Weather;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -22,9 +29,39 @@ public class APIManager {
     static final APIClient apiClient = new APIClient();
     static final APIInterface interfaceAPI = apiClient.getRetrofitInstance().create(APIInterface.class);
 //    static final APIInterface login = apiClient.getRetrofitInstance().create(APIInterface.class);
-    public static void fnGetHistoryWeather(CurrentWeatherCallback callback, long timestamp)
+    public static void fnGetHistoryWeather(long timestamp, HistoryWeatherCallback callback)
     {
-        Call<Weather> call = interfaceAPI.getHistory_weather()
+        Call<HistoryWeather> call = interfaceAPI.getHistory_weather(0,timestamp, "desc", 1);
+        call.enqueue(new Callback<HistoryWeather>() {
+            @Override
+            public void onResponse(Call<HistoryWeather> call, Response<HistoryWeather> response) {
+                if(response.isSuccessful())
+                {
+                    HistoryWeather historyWeather = response.body();
+                    ItemHistoryWeather item = new ItemHistoryWeather(historyWeather.data);
+                    Log.d("CALL API", "Call history success");
+                    callback.onSuccess(item.time, item.temperature, item.humidity);
+                }
+                else
+                {
+                    try {
+                        String errorBody = response.errorBody().string();
+                        Log.e("CALL API", "Error response: " + errorBody);
+                        callback.onFailure(errorBody);
+                    }
+                    catch (IOException e)
+                    {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+            @Override
+            public void onFailure(Call<HistoryWeather> call, Throwable t) {
+                Log.e("CALL API", "Network error: " + t.getMessage());
+                callback.onFailure(t.getMessage());
+            }
+        });
     }
     public static void fnGetCurrentWeather(CurrentWeatherCallback callback)
     {
@@ -37,8 +74,9 @@ public class APIManager {
                     Weather data = response.body();
                     ItemWeather temperature = data.temperature;
                     ItemWeather humidity = data.humidity;
-                    Log.d("API CALL", "Get current weather Success");
-                    callback.onSuccess(data, temperature, humidity);
+                    int delayTime = data.delay;
+                    Log.d("API CALL", String.valueOf(delayTime));
+                    callback.onSuccess(data, temperature, humidity, delayTime);
                 }
                 else {
                     try {
@@ -116,7 +154,6 @@ public class APIManager {
                     }
                 }
             }
-
             @Override
             public void onFailure(Call<String> call, Throwable t) {
                 Log.e("CALL API", "Network error: " + t.getMessage());
@@ -124,4 +161,5 @@ public class APIManager {
             }
         });
     }
+
 }

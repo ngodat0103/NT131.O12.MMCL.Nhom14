@@ -10,6 +10,8 @@ public class Weather {
     public ItemWeather temperature;
     @SerializedName("humidity")
     public ItemWeather humidity;
+    @SerializedName("delay")
+    public int delay;
 
 }
 
