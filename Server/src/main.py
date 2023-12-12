@@ -102,7 +102,7 @@ def listen_on(current_socket: socket.socket):
                     with share_lock:
                         share.command_code = share.KEEP_CONFIG
                         database_module.access_database(general_statements["update_device_status"], (True, "esp8266"))
-            except ConnectionError | ValueError | TypeError:
+            except Exception:
                 response_mysql = database_module.access_database(general_statements["get_device_status"], ("ras",))
                 if response_mysql[0][0] == 1 and response_mysql[0][1] == 0:
                     response_mysql = database_module.access_database(general_statements["get_emails"])
