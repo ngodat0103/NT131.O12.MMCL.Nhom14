@@ -254,14 +254,20 @@ def history(left, right, order, limit, download=False):
     return body
 
 
-def device_setting(device_name: str):
-    response = database_module.access_database(general_statements["get_device_info"], (device_name,))
-    return {
+def device_info(device_name: str):
+    response_mysql = database_module.access_database(general_statements["get_device_info"], (device_name,))
+
+    response_temp = {
         "Device_name": device_name,
-        "Delay time": str(response[0][1]) + "ms",
-        "Warning limit temperature": response[0][2],
-        "Warning limit humidity": response[0][3]
+        "Delay time": str(response_mysql[0][1]) + "ms" if response_mysql[0][1] is not None else None,
+        "Warning limit temperature": response_mysql[0][2],
+        "Warning limit humidity": response_mysql[0][3],
+        "online": True if response_mysql[0][4] == 1 else False
     }
+
+    response = {key: value for key, value in response_temp.items() if value is not None}
+
+    return response
 
 
 def change_password(argument: dict):

@@ -56,7 +56,7 @@ async def login(response: Response, username: Annotated[str, Form()],
     return HTTPException(status_code=401, detail="invalid username or password")
 
 
-@app.post("/registration", tags=['User'])
+@app.post("/user/registration", tags=['User'])
 async def registration(response: Response,
                        username: Annotated[str, Form()],
                        password: Annotated[str, Form()],
@@ -70,7 +70,7 @@ async def registration(response: Response,
     return HTTPException(detail="username existed", status_code=422)
 
 
-@app.get("/image", tags=['User'])
+@app.get("/user/image", tags=['User'])
 async def get_image(refresh_token: str):
     image_bytes = load_profile_image(refresh_token)
     if image_bytes is None:
@@ -80,7 +80,7 @@ async def get_image(refresh_token: str):
     return Response(image_bytes, media_type="image/png")
 
 
-@app.get("/image/download", tags=['User'])
+@app.get("/user/image/download", tags=['User'])
 async def get_image(refresh_token: str):
     image_bytes = load_profile_image(refresh_token)
     if image_bytes is None:
@@ -146,12 +146,12 @@ async def get_history(left: int = 0, right: int = 2147483647, order: str = "desc
         raise HTTPException(status_code=400, detail="order is invalid")
 
 
-@app.get("/device/setting", tags=['Devices'])
-async def get_device_setting(response: Response, device_name: str = "esp8266"):
+@app.get("/device/info", tags=['Devices'])
+async def get_device_info(response: Response, device_name: str = "esp8266"):
     if len(database_module.access_database(general_statements["get_device_info"], (device_name,))) == 0:
         response.status_code = status.HTTP_422_UNPROCESSABLE_ENTITY
         return HTTPException(status_code=422, detail="device not found")
-    return device_setting(device_name)
+    return device_info(device_name)
 
 
 @app.post("/update_temp", tags=['Sensors'])
