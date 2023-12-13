@@ -28,6 +28,7 @@ import com.jjoe64.graphview.series.LineGraphSeries;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.HistoryWeatherCallback;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -209,7 +210,8 @@ public class DayTemperatureFragment extends DialogFragment {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
                     return simpleDateFormat.format(date);
                 } else {
-                    return super.formatLabel(value, isValueX);
+                    DecimalFormat df = new DecimalFormat("0.00");
+                    return df.format(value).concat(" ℃");
                 }
             }
         });

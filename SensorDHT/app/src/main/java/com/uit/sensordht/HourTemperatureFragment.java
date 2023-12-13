@@ -43,6 +43,7 @@ import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.ItemHistoryWeather;
 import com.uit.sensordht.Model.XAxisTimeFormatter;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -214,6 +215,8 @@ public class HourTemperatureFragment extends DialogFragment {
 
         graphView.getGridLabelRenderer().setNumHorizontalLabels(10);
         graphView.getGridLabelRenderer().setNumVerticalLabels(10);
+
+
         GridLabelRenderer gridLabelRenderer = graphView.getGridLabelRenderer();
         gridLabelRenderer.setLabelFormatter(new DefaultLabelFormatter() {
             @Override
@@ -224,7 +227,9 @@ public class HourTemperatureFragment extends DialogFragment {
                     SimpleDateFormat simpleDateFormat = new SimpleDateFormat("HH:mm", Locale.getDefault());
                     return simpleDateFormat.format(date);
                 } else {
-                    return super.formatLabel(value, isValueX);
+                    DecimalFormat df = new DecimalFormat("0.00");
+
+                    return df.format(value).concat(" ℃");
                 }
             }
         });

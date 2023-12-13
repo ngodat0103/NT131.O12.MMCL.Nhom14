@@ -8,10 +8,12 @@ import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import android.app.Dialog;
+import android.content.Intent;
 import android.content.res.Resources;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,6 +23,7 @@ import com.uit.sensordht.Interface.CurrentWeatherCallback;
 import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.Weather;
+import com.uit.sensordht.monitor.Monitor;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -30,7 +33,14 @@ import java.util.TimeZone;
 public class HomeActivity extends AppCompatActivity {
     TextView tvHumidity, tvTemperature, tvTime, tvMinHumidity, tvMaxHumidity, tvMinTemperature, tvMaxTemperature;
     ConstraintLayout clTemperature, clHumidity;
+    Button device_btn,logout_btn;
     public Fragment secondFragment;
+
+    @Override
+    public void onBackPressed() {
+        return;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -44,6 +54,27 @@ public class HomeActivity extends AppCompatActivity {
         clHumidity = findViewById(R.id.clHumidity);
         tvMinTemperature = findViewById(R.id.tvMin);
         tvMaxTemperature = findViewById(R.id.tvMax);
+        device_btn = findViewById(R.id.btn_devices);
+        device_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent monitor = new Intent(getApplicationContext(), Monitor.class);
+                startActivity(monitor);
+            }
+        });
+
+
+
+        logout_btn = findViewById(R.id.btn_logout);
+        logout_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                finish();
+            }
+        });
+
+
+
         APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
             @Override
             public void onSuccess(Weather weather, ItemWeather temperatureData, ItemWeather humidityData, int delayTime) {

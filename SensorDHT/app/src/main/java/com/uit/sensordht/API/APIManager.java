@@ -102,7 +102,9 @@ public static void fnGetHistoryWeather(long timestamp, HistoryWeatherCallback ca
                 if(response.isSuccessful())
                 {
                     Log.d("API CALL", "Login Success");
-                    callback.onSuccess("Login Success");
+                    String body = response.body().toString();
+                    String refresh_token =  Objects.requireNonNull(new Gson().fromJson(body, Map.class).getOrDefault("refresh_token", "null")).toString();
+                    callback.onSuccess(refresh_token);
                 }
                 else {
                     try {

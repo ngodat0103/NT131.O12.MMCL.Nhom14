@@ -18,6 +18,7 @@ import com.google.android.material.textfield.TextInputEditText;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.CreateUserCallback;
 import com.uit.sensordht.Interface.LoginUserCallback;
+import com.uit.sensordht.Model.GlobalVars;
 
 public class MainActivity extends AppCompatActivity{
     AppCompatButton btSignUp, btSignIn;
@@ -116,6 +117,7 @@ public class MainActivity extends AppCompatActivity{
                     public void onSuccess(String message) {
                         Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                         bottomSheetDialog.dismiss();
+                        GlobalVars.refresh_token = message;
                         Intent intent = new Intent(MainActivity.this, HomeActivity.class);
                         startActivity(intent);
                     }
