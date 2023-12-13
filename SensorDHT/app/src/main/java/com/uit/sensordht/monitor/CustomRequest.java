@@ -69,8 +69,13 @@ public class CustomRequest {
         BufferedReader in ;
 
         int status = con.getResponseCode();
-        if (status==200)
+
+        if (status==204)
             return null;
+
+
+        if (status==200)
+            in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         else
             in = new BufferedReader(new InputStreamReader(con.getErrorStream()));
         StringBuilder builder = new StringBuilder();

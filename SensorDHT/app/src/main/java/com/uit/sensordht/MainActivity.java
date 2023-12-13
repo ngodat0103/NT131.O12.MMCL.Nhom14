@@ -115,7 +115,6 @@ public class MainActivity extends AppCompatActivity{
                 APIManager.fnLogin(username, password, new LoginUserCallback() {
                     @Override
                     public void onSuccess(String message) {
-                        Toast.makeText(MainActivity.this, message, Toast.LENGTH_SHORT).show();
                         bottomSheetDialog.dismiss();
                         GlobalVars.refresh_token = message;
                         Intent intent = new Intent(MainActivity.this, HomeActivity.class);

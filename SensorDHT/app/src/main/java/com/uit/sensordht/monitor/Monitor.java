@@ -26,18 +26,98 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 public class Monitor extends AppCompatActivity {
     TextView esp,ras;
     Thread background_Thread ;
     Button reboot_ras,reboot_esp;
+    Button notify_btn;
 
 
     @Override
     protected void onStart() {
         background_Thread.start();
+        getNotifySettingThread().start();
+
         super.onStart();
     }
+
+
+
+    Thread setNotifySettingThread(){
+        return new Thread(new Runnable() {
+            final Map<String,String> parameter = new HashMap<>();
+            final String refresh_token =GlobalVars.refresh_token;
+            final boolean is_notified = GlobalVars.is_notified;
+            @Override
+            public void run() {
+                parameter.put("refresh_token",refresh_token);
+                if (is_notified)
+                    parameter.put("notification","false");
+                else
+                    parameter.put("notification","true");
+
+                try {
+                    CustomRequest request = new CustomRequest(
+                            "https://server.uitprojects.com/user/set-notification",
+                            "POST",
+                            null,
+                            parameter
+                    );
+                    request.sendRequest();
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+
+            }
+        });
+    }
+
+
+
+
+    Thread getNotifySettingThread(){
+        String refresh_token = GlobalVars.refresh_token;
+        return new Thread(new Runnable() {
+            String url = String.format("https://server.uitprojects.com/user/notification?refresh_token=%s",refresh_token);
+            @Override
+            public void run() {
+                try {
+                    CustomRequest request = new CustomRequest(
+                            url,
+                            "GET",
+                            null,
+                            null
+                    );
+                    Map<String,String> response = request.sendRequest();
+                    int stop = 0 ;
+                    new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                        final String notify = response.get("notification");
+                        @SuppressLint("SetTextI18n")
+                        @Override
+                        public void run() {
+                            if (Objects.equals(notify, "true")) {
+                                GlobalVars.is_notified = true;
+                                notify_btn.setText("On");
+                            }
+                            else {
+                                notify_btn.setText("Off");
+                                GlobalVars.is_notified = false;
+                            }
+                        }
+                    },500);
+
+
+                } catch (IOException e) {
+                    throw new RuntimeException(e);
+                }
+            }
+        });
+    }
+
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -46,6 +126,27 @@ public class Monitor extends AppCompatActivity {
         esp = findViewById(R.id.esp_value);
         ras  = findViewById(R.id.ras_value);
         reboot_esp = findViewById(R.id.btn_esp_reboot);
+        notify_btn = findViewById(R.id.notification_value);
+        notify_btn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    setNotifySettingThread().start();
+                    setNotifySettingThread().join();
+                    Thread.sleep(2000);
+                    getNotifySettingThread().start();
+                } catch (InterruptedException e) {
+                    throw new RuntimeException(e);
+                }
+
+
+            }
+        });
+
+
+
+
+
         reboot_esp.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
