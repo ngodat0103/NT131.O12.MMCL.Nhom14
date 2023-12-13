@@ -2,7 +2,6 @@ package com.uit.sensordht;
 
 import android.graphics.Color;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,6 @@ import com.github.mikephil.charting.data.LineData;
 import com.github.mikephil.charting.data.LineDataSet;
 import com.uit.sensordht.API.APIManager;
 import com.uit.sensordht.Interface.CurrentWeatherCallback;
-import com.uit.sensordht.Interface.HistoryWeatherCallback;
 import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.Model.ItemWeather;
 import com.uit.sensordht.Model.Weather;
@@ -28,7 +26,7 @@ import com.uit.sensordht.Model.XAxisTimeFormatter;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class SecondTemperatureFragment extends DialogFragment {
+public class SecondHumidityFragment extends DialogFragment {
     LineChart lineChart;
     int setValue = 0;
     private LineData data;
@@ -94,8 +92,8 @@ public class SecondTemperatureFragment extends DialogFragment {
         yAxisRight.setDrawAxisLine(false);
         yAxisRight.setDrawLabels(false);
         yAxisRight.setDrawGridLines(false);
-        yAxisLeft.setAxisMinimum(20f);
-        yAxisLeft.setAxisMaximum(40f);
+        yAxisLeft.setAxisMinimum(0f);
+        yAxisLeft.setAxisMaximum(100f);
 
         //X-axis
         xAxis = lineChart.getXAxis();
@@ -112,7 +110,7 @@ public class SecondTemperatureFragment extends DialogFragment {
         startTimer();
     }
     private void startTimer() {
-        DelayHolder delayHolder = new DelayHolder(1000); // Class để giữ giá trị delay
+        SecondHumidityFragment.DelayHolder delayHolder = new SecondHumidityFragment.DelayHolder(1000); // Class để giữ giá trị delay
         if (timer != null) {
             timer.cancel();
             timer.purge();
@@ -126,7 +124,7 @@ public class SecondTemperatureFragment extends DialogFragment {
                     APIManager.fnGetCurrentWeather(new CurrentWeatherCallback() {
                         @Override
                         public void onSuccess(Weather weather, ItemWeather temperature, ItemWeather humidity, int delay) {
-                            float newValue = temperature.current;
+                            float newValue = humidity.current;
                             delayHolder.setDelay(delay); // Cập nhật giá trị delay từ hàm onSuccess
                             LineDataSet dataSet = (LineDataSet) lineChart.getData().getDataSetByIndex(0);
                             if (dataSet == null) {
@@ -139,7 +137,7 @@ public class SecondTemperatureFragment extends DialogFragment {
                             data.notifyDataChanged();
                             xAxis.setDrawGridLinesBehindData(true);
 
-                            setValue += 5;
+                            setValue += 1;
                             lineChart.notifyDataSetChanged();
                             lineChart.fitScreen();
                             lineChart.setVisibleXRangeMaximum(10);

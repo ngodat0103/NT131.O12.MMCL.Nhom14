@@ -13,15 +13,12 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.uit.sensordht.Model.GlobalVars;
 import com.uit.sensordht.R;
-import com.uit.sensordht.TemperatureDialogFragment;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
-import java.net.ProtocolException;
 import java.net.URL;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;

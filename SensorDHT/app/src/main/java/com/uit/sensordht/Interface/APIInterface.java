@@ -22,7 +22,7 @@ public interface APIInterface {
     @GET("https://server.uitprojects.com/current_temp")
     Call<Weather> getCurrent_temp();
     @GET("https://server.uitprojects.com/history")
-    Call<HistoryWeather> getHistory_weather(@Query("left") long left,
+    Call<JsonObject> getHistory_weather(@Query("left") long left,
                                             @Query("right") long right,
                                             @Query("order") String order,
                                             @Query("limit") int limit);

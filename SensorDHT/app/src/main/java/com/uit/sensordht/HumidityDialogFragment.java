@@ -11,18 +11,17 @@ import android.view.WindowManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 
 import nl.joery.animatedbottombar.AnimatedBottomBar;
 
-public class TemperatureDialogFragment extends DialogFragment {
+public class HumidityDialogFragment extends DialogFragment{
     DialogFragment secondFragment;
     DialogFragment hourFragment, dayFragment;
     AnimatedBottomBar navBar;
-    public static TemperatureDialogFragment newInstance() {
-        return new TemperatureDialogFragment();
+    public static HumidityDialogFragment newInstance() {
+        return new HumidityDialogFragment();
     }
 
     @Nullable
@@ -31,7 +30,7 @@ public class TemperatureDialogFragment extends DialogFragment {
         View view = inflater.inflate(R.layout.dialog_sheet_temperature, container, false);
 
         // Thêm Fragment vào Dialog
-        secondFragment = new SecondTemperatureFragment();
+        secondFragment = new SecondHumidityFragment();
         getChildFragmentManager().beginTransaction()
                 .replace(R.id.fl_temperature, secondFragment) // R.id.fl_temperature là ID của layout trong dialog_sheet_temperature.xml để chứa Fragment
                 .commit();
@@ -44,8 +43,8 @@ public class TemperatureDialogFragment extends DialogFragment {
         super.onViewCreated(view, savedInstanceState);
         getDialog().getWindow().setBackgroundDrawableResource(R.drawable.bg_dialog_info);
         setCancelable(true);
-        hourFragment = new HourTemperatureFragment();
-        dayFragment = new DayTemperatureFragment();
+        hourFragment = new HourHumidityFragment();
+        dayFragment = new DayHumidityFragment();
         InitViews(view);
         InitEvents();
     }
